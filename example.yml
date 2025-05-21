@@ -1,2 +1,15 @@
 test:
+  classes:
+    - hello
+  id: test
   title: hello
+  height: 50
+  orientation: horizontal
+  anchor:
+    - top
+    - right
+    - left
+  child:
+    margin-all: 30
+    type: box
+    label: test
