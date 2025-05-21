@@ -344,18 +344,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gtk-widgets"
-version = "0.1.0"
-dependencies = [
- "gdk4",
- "gio",
- "glib",
- "gtk4",
- "gtk4-layer-shell",
- "hypr-ipc",
-]
-
-[[package]]
 name = "gtk4"
 version = "0.9.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -826,6 +814,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c06928c8748d81b05c9be96aad92e1b6ff01833332f281e8cfca3be4b35fc9ec"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "wow"
+version = "0.1.0"
+dependencies = [
+ "gdk4",
+ "gio",
+ "glib",
+ "gtk4",
+ "gtk4-layer-shell",
+ "hypr-ipc",
 ]
 
 [[package]]
