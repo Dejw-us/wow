@@ -1,8 +1,9 @@
 use gtk4::prelude::*;
 use gtk4::{Application, ApplicationWindow, Box as GtkBox, Label, Orientation};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
-use hypr_ipc::ctl::CtlSocket;
 use hypr_ipc::error::Result;
+
+pub mod window;
 
 fn main() -> Result<()> {
   unsafe {
