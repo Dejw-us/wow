@@ -1,15 +1,13 @@
 test:
-  classes:
-    - hello
-  id: test
-  title: hello
-  height: 50
+  label:
+    type: exact
+    value: hello
+  state:
+    message: wow
+  on-click: "hah"
+  spacing: 0
   orientation: horizontal
-  anchor:
-    - top
-    - right
-    - left
-  child:
-    margin-all: 30
-    type: box
-    label: test
+  margin:
+    left: i32
+  classes:
+    - "hello"
