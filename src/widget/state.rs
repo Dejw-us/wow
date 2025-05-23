@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, env::var_os, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, env::var_os, fmt::Debug, rc::Rc};
 
 use getset::Getters;
 use serde::Deserialize;
@@ -37,7 +37,7 @@ impl ToString for StateValue {
   }
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct WidgetStates(HashMap<String, State>);
 
 impl<'de> Deserialize<'de> for WidgetStates {
@@ -72,6 +72,12 @@ impl WidgetStates {
 pub struct State {
   value: Rc<RefCell<StateValue>>,
   listeners: Rc<RefCell<Vec<Box<dyn Fn(&StateValue)>>>>,
+}
+
+impl Debug for State {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.debug_struct("State").field("value", &self.value).finish()
+  }
 }
 
 impl State {

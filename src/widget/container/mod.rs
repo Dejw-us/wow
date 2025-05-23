@@ -19,7 +19,7 @@ use super::{
   state::{State, StateValue, WidgetStates},
 };
 
-#[derive(Builder, Clone, Deserialize)]
+#[derive(Builder, Clone, Deserialize, Debug)]
 #[builder(setter(into))]
 pub struct Container {
   label: WidgetLabel,
@@ -70,8 +70,8 @@ impl WidgetRender for Container {
     self.margin.set(&container);
 
     match &self.label {
-      WidgetLabel::Exact(label) => box_label.set_label(&label),
-      WidgetLabel::State(name) => {
+      WidgetLabel::Exact { label } => box_label.set_label(&label),
+      WidgetLabel::State { name } => {
         let state = self.states.get(&name).expect("Failed to find state");
 
         state.subscribe(move |value| {

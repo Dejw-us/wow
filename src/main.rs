@@ -1,29 +1,7 @@
-use std::fs::File;
-use std::io::Read;
-use std::rc::Rc;
-use std::{env::set_var, time::Duration};
+use std::{collections::HashMap, fs::File, io::Read};
 
-use derive_builder::Builder;
-use error::Error;
-use gtk4::glib::ControlFlow;
-use gtk4::{
-  Application, ApplicationWindow, Box as GtkBox, Label, Orientation,
-  gio::prelude::{ApplicationExt, ApplicationExtManual},
-  glib::timeout_add_local,
-  prelude::{GtkWindowExt, WidgetExt},
-};
-use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use widget::Widget;
-use widget::container::ContainerBuilder;
-use widget::margin::MarginBuilder;
-use widget::{
-  WidgetRender,
-  container::Container,
-  label::WidgetLabel,
-  state::{State, StateValue},
-};
 use window::{Window, WindowBuilder};
-
 pub mod error;
 pub mod widget;
 pub mod window;
@@ -31,14 +9,16 @@ pub mod window;
 fn main() {
   gtk4::init().expect("Failed to init gtk");
 
-  let child = ContainerBuilder::default()
-    .label(WidgetLabel::Exact("Hello".to_string()))
-    .build()
-    .expect("Failed to build container");
+  let mut file = File::open("./example.yml").expect("Failed to open file");
+  let mut buf = String::new();
+  file.read_to_string(&mut buf).expect("Failed to read file");
+  let widget: HashMap<String, Widget> = serde_yaml::from_str(&buf).expect("Failed to deserialize");
+  println!("widget: {:?}", widget);
+  let widget = widget.get("test").unwrap();
 
   let window = WindowBuilder::default()
-    .id("me.test".to_string())
-    .child(Some(Widget::Container(child)))
+    .id("me.dawid".to_string())
+    .child(Some(widget.clone()))
     .build()
     .expect("Failed to build window");
 

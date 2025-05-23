@@ -8,7 +8,8 @@ pub mod margin;
 pub mod orientation;
 pub mod state;
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(tag = "type", rename_all = "lowercase")]
 pub enum Widget {
   Container(Container),
 }

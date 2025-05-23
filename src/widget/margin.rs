@@ -2,7 +2,7 @@ use derive_builder::Builder;
 use gtk4::prelude::WidgetExt;
 use serde::Deserialize;
 
-#[derive(Builder, Default, Clone, Deserialize)]
+#[derive(Builder, Default, Clone, Deserialize, Debug)]
 #[builder(default)]
 #[serde(default)]
 pub struct Margin {
