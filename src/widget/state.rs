@@ -66,6 +66,12 @@ impl WidgetStates {
   pub fn get(&self, name: &str) -> Option<&State> {
     self.0.get(name)
   }
+
+  pub fn set(&self, name: &str, value: StateValue) {
+    if let Some(state) = self.get(name) {
+      state.set(value);
+    }
+  }
 }
 
 #[derive(Clone, Default)]
@@ -103,4 +109,8 @@ impl State {
   pub fn get(&self) -> StateValue {
     self.value.borrow().clone()
   }
+}
+
+pub trait StateWidget {
+  fn states(&self) -> &WidgetStates;
 }

@@ -19,6 +19,59 @@ use super::{
   state::{State, StateValue, WidgetStates},
 };
 
+#[derive(Deserialize, Clone)]
+pub struct RawContainer {
+  label: WidgetLabel,
+  #[serde(rename = "state")]
+  states: WidgetStates,
+  #[serde(rename = "on-click")]
+  on_click: Option<String>,
+  spacing: i32,
+  orientation: Orientation,
+  margin: Margin,
+  classes: Vec<String>,
+}
+
+fn parse_set_command(s: &str) -> Option<(String, String)> {
+  if s.starts_with('$') {
+    let parts: Vec<&str> = s[1..].split('=').collect();
+    if parts.len() == 2 {
+      let name = parts[0].to_string();
+      let mut val = parts[1].trim().to_string();
+      if val.starts_with('"') && val.ends_with('"') {
+        val = val[1..val.len() - 1].to_string();
+      }
+      return Some((name, val));
+    }
+  }
+  None
+}
+
+impl Into<Container> for RawContainer {
+  fn into(self) -> Container {
+    let states_clone = self.states.clone();
+    let mut action: Option<Action> = None;
+    if let Some(raw_action) = self.on_click {
+      if let Some((name, value)) = parse_set_command(&raw_action) {
+        action = Some(Action::new(move || {
+          states_clone.set(&name, StateValue::String(value.to_string()));
+          Ok(())
+        }));
+      }
+    }
+
+    Container {
+      on_click: action,
+      label: self.label,
+      states: self.states,
+      spacing: self.spacing,
+      orientation: self.orientation,
+      margin: self.margin,
+      classes: self.classes,
+    }
+  }
+}
+
 #[derive(Builder, Clone, Deserialize, Debug)]
 #[builder(setter(into))]
 pub struct Container {

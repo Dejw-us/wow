@@ -4,6 +4,8 @@ use serde::Deserialize;
 
 use crate::error;
 
+use super::container::RawContainer;
+
 #[derive(Clone)]
 pub struct Action(Rc<dyn Fn() -> error::Result<()> + 'static>);
 
@@ -14,6 +16,10 @@ impl Debug for Action {
 }
 
 impl Action {
+  pub fn new(action: impl Fn() -> error::Result<()> + 'static) -> Self {
+    Self(Rc::new(action))
+  }
+
   pub fn clone_inner(&self) -> Rc<dyn Fn() -> error::Result<()> + 'static> {
     self.0.clone()
   }
@@ -25,6 +31,7 @@ impl<'de> Deserialize<'de> for Action {
     D: serde::Deserializer<'de>,
   {
     let raw_action = String::deserialize(deserializer)?;
+
     let action = move || {
       println!("action: {}", raw_action);
       Ok(())

@@ -1,4 +1,4 @@
-use container::Container;
+use container::{Container, RawContainer};
 use serde::Deserialize;
 
 pub mod action;
@@ -12,6 +12,20 @@ pub mod state;
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum Widget {
   Container(Container),
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(tag = "type", rename_all = "lowercase")]
+pub enum RawWidget {
+  Container(RawContainer),
+}
+
+impl Into<Widget> for &RawWidget {
+  fn into(self) -> Widget {
+    match self {
+      RawWidget::Container(container) => Widget::Container(container.clone().into()),
+    }
+  }
 }
 
 impl WidgetRender for Widget {

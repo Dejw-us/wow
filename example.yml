@@ -1,14 +1,14 @@
 test:
   type: container
   label:
-    type: exact
-    label: hello
+    type: state
+    name: message
   state:
     message: wow
-  on-click: "hah"
+  on-click: $message="hejka"
   spacing: 0
   orientation: horizontal
-  margin:
-    left: 12
+  margin: 
+    left: 1
   classes:
-    - "hello"
+    - hello
