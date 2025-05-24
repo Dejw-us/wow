@@ -16,7 +16,7 @@ use super::{
   label::WidgetLabel,
   margin::Margin,
   orientation::{self, Orientation},
-  state::{State, StateValue, WidgetStates},
+  state::{State, StateValue, StateWidget, WidgetStates},
 };
 
 #[derive(Deserialize, Clone)]
@@ -47,30 +47,30 @@ fn parse_set_command(s: &str) -> Option<(String, String)> {
   None
 }
 
-impl Into<Container> for RawContainer {
-  fn into(self) -> Container {
-    let states_clone = self.states.clone();
-    let mut action: Option<Action> = None;
-    if let Some(raw_action) = self.on_click {
-      if let Some((name, value)) = parse_set_command(&raw_action) {
-        action = Some(Action::new(move || {
-          states_clone.set(&name, StateValue::String(value.to_string()));
-          Ok(())
-        }));
-      }
-    }
+// impl Into<Container> for RawContainer {
+//   fn into(self) -> Container {
+//     let states_clone = self.states.clone();
+//     let mut action: Option<Action> = None;
+//     if let Some(raw_action) = self.on_click {
+//       if let Some((name, value)) = parse_set_command(&raw_action) {
+//         action = Some(Action::new(move || {
+//           states_clone.set(&name, StateValue::String(value.to_string()));
+//           Ok(())
+//         }));
+//       }
+//     }
 
-    Container {
-      on_click: action,
-      label: self.label,
-      states: self.states,
-      spacing: self.spacing,
-      orientation: self.orientation,
-      margin: self.margin,
-      classes: self.classes,
-    }
-  }
-}
+//     Container {
+//       on_click: action,
+//       label: self.label,
+//       states: self.states,
+//       spacing: self.spacing,
+//       orientation: self.orientation,
+//       margin: self.margin,
+//       classes: self.classes,
+//     }
+//   }
+// }
 
 #[derive(Builder, Clone, Deserialize, Debug)]
 #[builder(setter(into))]
@@ -92,10 +92,9 @@ pub struct Container {
   classes: Vec<String>,
 }
 
-impl ContainerBuilder {
-  pub fn on_click(&mut self, on_click: Action) -> &mut Self {
-    self.on_click = Some(Some(on_click));
-    self
+impl StateWidget for Container {
+  fn states(&self) -> &WidgetStates {
+    &self.states
   }
 }
 

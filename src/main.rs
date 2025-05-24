@@ -12,13 +12,12 @@ fn main() {
   let mut file = File::open("./example.yml").expect("Failed to open file");
   let mut buf = String::new();
   file.read_to_string(&mut buf).expect("Failed to read file");
-  let widget: HashMap<String, RawWidget> =
-    serde_yaml::from_str(&buf).expect("Failed to deserialize");
+  let widget: HashMap<String, Widget> = serde_yaml::from_str(&buf).expect("Failed to deserialize");
   let widget = widget.get("test").unwrap();
 
   let window = WindowBuilder::default()
     .id("me.dawid".to_string())
-    .child(Some(widget.into()))
+    .child(Some(widget.clone()))
     .build()
     .expect("Failed to build window");
 

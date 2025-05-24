@@ -1,13 +1,19 @@
-use std::{fmt::Debug, rc::Rc};
+use std::{fmt::Debug, marker::PhantomData, rc::Rc, str::FromStr};
 
 use serde::Deserialize;
 
 use crate::error;
 
-use super::container::RawContainer;
+use super::{
+  container::RawContainer,
+  state::{StateValue, StateWidget},
+};
 
 #[derive(Clone)]
-pub struct Action(Rc<dyn Fn() -> error::Result<()> + 'static>);
+pub enum Action {
+  None,
+  SetState { name: String, value: StateValue },
+}
 
 impl Debug for Action {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -16,12 +22,15 @@ impl Debug for Action {
 }
 
 impl Action {
-  pub fn new(action: impl Fn() -> error::Result<()> + 'static) -> Self {
-    Self(Rc::new(action))
+  pub fn run(&self, widget: &impl StateWidget) {
+    match self {
+      Action::None => (),
+      Action::SetState { name, value } => self.run_set_state(widget, &name, value),
+    }
   }
 
-  pub fn clone_inner(&self) -> Rc<dyn Fn() -> error::Result<()> + 'static> {
-    self.0.clone()
+  fn run_set_state(&self, widget: &impl StateWidget, name: &str, value: &StateValue) {
+    widget.states().set(name, value.clone());
   }
 }
 
@@ -30,12 +39,36 @@ impl<'de> Deserialize<'de> for Action {
   where
     D: serde::Deserializer<'de>,
   {
-    let raw_action = String::deserialize(deserializer)?;
+    let s = String::deserialize(deserializer)?;
+    match Action::from_str(&s) {
+      Ok(action) => Ok(action),
+      Err(message) => {
+        println!("Failed to deserialize: {}", message);
+        Ok(Action::None)
+      }
+    }
+  }
+}
 
-    let action = move || {
-      println!("action: {}", raw_action);
-      Ok(())
-    };
-    Ok(Action(Rc::new(action)))
+impl FromStr for Action {
+  type Err = String;
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    let s = s.trim();
+    let i = s.find("(").unwrap_or(0);
+    let name = &s[0..i];
+    let args = s
+      .strip_prefix(&format!("{}(", name))
+      .expect("Failed to strip prefix")
+      .strip_suffix(")")
+      .expect("Failed to strip suffix");
+    let args: Vec<&str> = args.split(",").into_iter().collect();
+    Ok(match name {
+      "setState" => Action::SetState {
+        name: args[0].to_string(),
+        value: StateValue::String(args[1].to_string()),
+      },
+      _ => panic!("Failed to match"),
+    })
   }
 }

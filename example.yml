@@ -5,7 +5,7 @@ test:
     name: message
   state:
     message: wow
-  on-click: $message="hejka"
+  on-click: setState(message, hello)
   spacing: 0
   orientation: horizontal
   margin: 
