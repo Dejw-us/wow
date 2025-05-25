@@ -107,11 +107,9 @@ impl WidgetRender for Container {
 
     if let Some(on_click) = &self.on_click {
       let click = GestureClick::new();
-      let on_click = on_click.clone_inner();
-      click.connect_pressed(move |_, _, _, _| match on_click() {
-        Ok(_) => (),
-        Err(err) => err.print_message(),
-      });
+      let on_click = on_click.clone();
+      let states = self.states().clone();
+      click.connect_pressed(move |_, _, _, _| on_click.run(&states));
       box_label.add_controller(click);
     }
 

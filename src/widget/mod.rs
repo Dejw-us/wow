@@ -20,13 +20,13 @@ pub enum RawWidget {
   Container(RawContainer),
 }
 
-impl Into<Widget> for &RawWidget {
-  fn into(self) -> Widget {
-    match self {
-      RawWidget::Container(container) => Widget::Container(container.clone().into()),
-    }
-  }
-}
+// impl Into<Widget> for &RawWidget {
+//   fn into(self) -> Widget {
+//     match self {
+//       RawWidget::Container(container) => Widget::Container(container.clone()),
+//     }
+//   }
+// }
 
 impl WidgetRender for Widget {
   fn render(&self) -> gtk4::Widget {

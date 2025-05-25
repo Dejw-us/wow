@@ -6,7 +6,7 @@ use crate::error;
 
 use super::{
   container::RawContainer,
-  state::{StateValue, StateWidget},
+  state::{StateValue, StateWidget, WidgetStates},
 };
 
 #[derive(Clone)]
@@ -22,15 +22,15 @@ impl Debug for Action {
 }
 
 impl Action {
-  pub fn run(&self, widget: &impl StateWidget) {
+  pub fn run(&self, states: &WidgetStates) {
     match self {
       Action::None => (),
-      Action::SetState { name, value } => self.run_set_state(widget, &name, value),
+      Action::SetState { name, value } => self.run_set_state(states, &name, value),
     }
   }
 
-  fn run_set_state(&self, widget: &impl StateWidget, name: &str, value: &StateValue) {
-    widget.states().set(name, value.clone());
+  fn run_set_state(&self, states: &WidgetStates, name: &str, value: &StateValue) {
+    states.set(name, value.clone());
   }
 }
 

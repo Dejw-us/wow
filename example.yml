@@ -1,6 +1,6 @@
 test:
   type: container
-  label:
+  label: 
     type: state
     name: message
   state:
