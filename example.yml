@@ -1,14 +1,12 @@
 test:
   type: container
-  label: 
-    type: state
-    name: message
+  label: $state(message)
   state:
     message: wow
-  on-click: setState(message, hello)
+  on-click: $setState(message, hello)
   spacing: 0
   orientation: horizontal
-  margin: 
+  margin:  
     left: 1
   classes:
     - hello

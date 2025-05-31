@@ -1,25 +1,47 @@
-use std::{collections::HashMap, fs::File, io::Read};
+use gtk4::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkWindowExt, ObjectExt};
+use gtk4::{glib, Application, Window};
+use std::fs::{metadata, remove_file};
+use std::io::Write;
+use std::os::unix::net::UnixListener;
+use std::thread::spawn;
 
-use widget::{RawWidget, Widget};
-use window::{Window, WindowBuilder};
 pub mod error;
-pub mod widget;
-pub mod window;
 
 fn main() {
-  gtk4::init().expect("Failed to init gtk");
+  let socket_path = "/tmp/wow.sock";
 
-  let mut file = File::open("./example.yml").expect("Failed to open file");
-  let mut buf = String::new();
-  file.read_to_string(&mut buf).expect("Failed to read file");
-  let widget: HashMap<String, Widget> = serde_yaml::from_str(&buf).expect("Failed to deserialize");
-  let widget = widget.get("test").unwrap();
+  if (metadata(socket_path).is_ok()) {
+    remove_file(socket_path).expect("Failed to remove old socket");
+  }
 
-  let window = WindowBuilder::default()
-    .id("me.dawid".to_string())
-    .child(Some(widget.clone()))
-    .build()
-    .expect("Failed to build window");
+  let app = Application::builder().application_id("me.dejw-us").build();
+  let (sender, receiver) = async_channel::bounded(1);
 
-  window.open(true);
+  app.connect_activate(move |app| {
+    let guard = app.hold();
+    let receiver = receiver.clone();
+    let app = app.clone();
+    glib::spawn_future_local(async move {
+      while let Ok(_) = receiver.recv().await {
+        println!("Received message");
+        let window = Window::builder().application(&app).build();
+        window.present();
+      }
+      println!("Exiting");
+      drop(guard);
+    });
+    println!("Starting");
+  });
+
+  spawn(move || {
+    let listener = UnixListener::bind(socket_path).expect("Failed to bind to socket");
+    for stream in listener.incoming() {
+      let stream = stream.unwrap();
+      sender
+        .send_blocking(true)
+        .expect("Failed to send blocking message");
+    }
+  });
+
+  app.run();
 }
