@@ -1,6 +1,9 @@
+use crate::state::listener::StateListener;
 use std::cell::{Ref, RefCell};
 use std::fmt::Display;
 use std::rc::Rc;
+
+pub mod listener;
 
 pub enum StateValue {
   String(String),
@@ -21,7 +24,7 @@ impl Display for StateValue {
 
 pub struct State {
   value: Rc<RefCell<StateValue>>,
-  listeners: Vec<Box<dyn Fn(&StateValue) + 'static>>,
+  listeners: Vec<StateListener>,
 }
 
 impl State {
@@ -32,13 +35,13 @@ impl State {
     }
   }
 
-  pub fn subscribe_set(&mut self, listener: impl Fn(&StateValue) + 'static) {
-    self.listeners.push(Box::new(listener));
+  pub fn subscribe_set(&mut self, listener: StateListener) {
+    self.listeners.push(listener);
   }
 
-  pub fn set(&mut self, value: StateValue) {
+  pub fn set(&self, value: StateValue) {
     for listener in self.listeners.iter() {
-      listener(&value);
+      listener.run(&value);
     }
     *self.value.borrow_mut() = value;
   }
