@@ -1,18 +1,19 @@
-use crate::peek::PeekOption;
+use crate::peek::OptionPeek;
 use crate::state::StateValue;
+use crate::text::TextDisplay;
 use gtk4::glib::WeakRef;
-use gtk4::Label;
+use gtk4::{Button, Label};
 
 pub enum StateListener {
   Label(WeakRef<Label>),
+  Button(WeakRef<Button>),
 }
 
 impl StateListener {
   pub fn run(&self, value: &StateValue) {
     match self {
-      StateListener::Label(label) => label
-        .upgrade()
-        .peek(|label| label.set_label(&value.to_string())),
+      StateListener::Label(weak) => weak.upgrade().if_some(|l| l.set_text(&value.to_string())),
+      StateListener::Button(weak) => weak.upgrade().if_some(|b| b.set_text(&value.to_string())),
     }
   }
 }

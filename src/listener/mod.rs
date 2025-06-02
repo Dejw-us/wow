@@ -1,14 +1,19 @@
-use crate::config::text::Text;
-use crate::config::widget::label::LabelConfig;
+use crate::config::widget::button::ButtonConfig;
+use crate::config::widget::Widget;
 use crate::config::window::WindowConfig;
 use crate::context::Context;
+use crate::listener::message::Message;
+use crate::text::Text;
 use gtk4::prelude::{ApplicationExt, ApplicationExtManual};
 use gtk4::{glib, Application};
 use std::fs::{metadata, remove_file};
 use std::io;
+use std::io::Read;
 use std::os::unix::net::UnixListener;
 use std::rc::Rc;
 use std::thread::spawn;
+
+pub mod message;
 
 const LISTENER_PATH: &str = "/tmp/wow.sock";
 
@@ -40,12 +45,19 @@ impl AppListener {
       let app = app.clone();
       let context = context.clone();
       glib::spawn_future_local(async move {
-        while let Ok(_) = receiver.recv().await {
-          println!("Received message");
-          let window = WindowConfig::with_child(
-            LabelConfig::with_label(Text::State("test".to_string())).into(),
-          );
-          window.render(&app, context.as_ref());
+        while let Ok(msg) = receiver.recv().await {
+          println!("Received message {:?}", msg);
+          match msg {
+            Message::SetState(name, value) => {
+              context.set_state_value(&name, value);
+            }
+            Message::OpenWindow(name) => {
+              let window = WindowConfig::with_child(Widget::Button(ButtonConfig::with_label(
+                Text::State("test".to_string()),
+              )));
+              window.render(&app, context.clone());
+            }
+          }
         }
         println!("Exiting");
         drop(guard);
@@ -54,10 +66,12 @@ impl AppListener {
     });
 
     spawn(move || {
-      println!("Listening on {}", LISTENER_PATH);
       for stream in self.listener.incoming() {
-        println!("Accepted connection");
-        sender.send_blocking(true).unwrap();
+        let mut stream = stream.unwrap();
+        let mut buf = String::new();
+        stream.read_to_string(&mut buf).unwrap();
+        let msg = Message::parse(&buf);
+        sender.send_blocking(msg).unwrap();
       }
     });
 

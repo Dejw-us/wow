@@ -6,6 +6,7 @@ use std::io::Write;
 use std::ops::DerefMut;
 use std::rc::Rc;
 
+pub mod action;
 pub mod config;
 pub mod context;
 pub mod error;
@@ -13,6 +14,7 @@ pub mod listener;
 pub mod map;
 pub mod peek;
 pub mod state;
+pub mod text;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
   AppListener::clear()?;
@@ -20,6 +22,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     "test".to_string() => State::new(StateValue::Int(32))
   }));
   let listener = AppListener::new()?;
+  let mut context_clone = context.clone();
+
+  // spawn(|| {
+  //   sleep(Duration::from_millis(5000));
+  //   context_clone.set_state_value("test", StateValue::Int(1000));
+  // });
   listener.start(context);
   Ok(())
 }

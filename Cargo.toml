@@ -6,5 +6,6 @@ edition = "2024"
 
 [dependencies]
 gtk4 = "0.9.6"
+chrono = "0.4.41"
 async-channel = "2.3.1"
 gtk4-layer-shell = "0.5.0"

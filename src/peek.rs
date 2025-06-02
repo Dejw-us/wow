@@ -1,9 +1,9 @@
-pub trait PeekOption<T> {
-  fn peek(&self, peek: impl Fn(&T));
+pub trait OptionPeek<T> {
+  fn if_some(&self, peek: impl FnOnce(&T));
 }
 
-impl<T> PeekOption<T> for Option<T> {
-  fn peek(&self, peek: impl Fn(&T)) {
+impl<T> OptionPeek<T> for Option<T> {
+  fn if_some(&self, peek: impl FnOnce(&T)) {
     match self {
       None => {}
       Some(value) => peek(value),

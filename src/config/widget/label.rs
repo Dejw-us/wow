@@ -1,36 +1,28 @@
-use crate::config::text::Text;
-use crate::config::widget::Widget;
+use crate::config::widget::Render;
 use crate::context::Context;
-use gtk4::prelude::Cast;
+use crate::state::listener::StateListener;
+use crate::text::Text;
+use gtk4::prelude::{Cast, ObjectExt};
 use gtk4::Label;
+use std::rc::Rc;
 
 pub struct LabelConfig {
   label: Text,
 }
 
-impl Into<Widget> for LabelConfig {
-  fn into(self) -> Widget {
-    Widget::Label(self)
+impl Render for LabelConfig {
+  fn render(&self, context: Rc<Context>) -> gtk4::Widget {
+    let label = Label::builder().build();
+    let label_name = self
+      .label
+      .convert(context.as_ref(), || StateListener::Label(label.downgrade()));
+    label.set_label(&label_name);
+    label.upcast()
   }
 }
 
 impl LabelConfig {
   pub fn with_label(label: Text) -> Self {
     LabelConfig { label }
-  }
-
-  pub fn render(&self, context: &Context) -> gtk4::Widget {
-    let label = match &self.label {
-      Text::Text(text) => text.into(),
-      Text::State(state_name) => {
-        if let Some(state) = context.get_state(&state_name) {
-          state.get().to_string()
-        } else {
-          String::new()
-        }
-      }
-    };
-    let label = Label::builder().label(&label).build();
-    label.upcast()
   }
 }
