@@ -24,8 +24,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     "test".to_string() => State::new(StateValue::Int(32))
   }));
   let listener = AppListener::new()?;
-  let mut context_clone = context.clone();
-
   listener.start(context);
   Ok(())
 }
