@@ -1,8 +1,11 @@
 use crate::context::Context;
+use crate::peek::OptionPeek;
 use crate::state::listener::StateListener;
 use chrono::Local;
+use gtk4::glib::{timeout_add_local, ControlFlow, WeakRef};
 use gtk4::prelude::{ButtonExt, ObjectType};
 use gtk4::{Button, Label};
+use std::time::Duration;
 
 pub trait TextDisplay: ObjectType {
   fn get_text(&self) -> String;
@@ -32,11 +35,16 @@ impl TextDisplay for Label {
 pub enum Text {
   Text(String),
   State(String),
-  Clock(String, i32),
+  Clock(String, u64),
 }
 
 impl Text {
-  pub fn convert(&self, context: &Context, listener: impl Fn() -> StateListener) -> String {
+  pub fn convert(
+    &self,
+    context: &Context,
+    listener: impl Fn() -> StateListener,
+    weak: WeakRef<impl TextDisplay>,
+  ) -> String {
     match self {
       Text::Text(text) => text.into(),
       Text::State(state_name) => {
@@ -49,7 +57,15 @@ impl Text {
       }
       Text::Clock(format, update_rate) => {
         let now = Local::now();
-        now.format(&format).to_string()
+        let time_local = now.format(&format).to_string();
+        let format = format.to_string();
+        timeout_add_local(Duration::from_millis(update_rate.clone()), move || {
+          let now = Local::now();
+          let time = now.format(&format).to_string();
+          weak.upgrade().if_some(|label| label.set_text(&time));
+          ControlFlow::Continue
+        });
+        time_local
       }
     }
   }

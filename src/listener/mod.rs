@@ -53,7 +53,7 @@ impl AppListener {
             }
             Message::OpenWindow(name) => {
               let window = WindowConfig::with_child(Widget::Button(ButtonConfig::with_label(
-                Text::State("test".to_string()),
+                Text::Clock("%Y-%m-%d %H:%M:%S".to_string(), 1000),
               )));
               window.render(&app, context.clone());
             }

@@ -4,6 +4,7 @@ use crate::state::{State, StateValue};
 use gtk4::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkWindowExt, ObjectExt};
 use std::io::Write;
 use std::ops::DerefMut;
+use std::process;
 use std::rc::Rc;
 
 pub mod action;
@@ -17,6 +18,7 @@ pub mod state;
 pub mod text;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+  println!("{}", process::id());
   AppListener::clear()?;
   let context = Rc::new(Context::with_states(map! {
     "test".to_string() => State::new(StateValue::Int(32))
@@ -24,10 +26,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
   let listener = AppListener::new()?;
   let mut context_clone = context.clone();
 
-  // spawn(|| {
-  //   sleep(Duration::from_millis(5000));
-  //   context_clone.set_state_value("test", StateValue::Int(1000));
-  // });
   listener.start(context);
   Ok(())
 }

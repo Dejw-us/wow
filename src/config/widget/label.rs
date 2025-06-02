@@ -13,9 +13,11 @@ pub struct LabelConfig {
 impl Render for LabelConfig {
   fn render(&self, context: Rc<Context>) -> gtk4::Widget {
     let label = Label::builder().build();
-    let label_name = self
-      .label
-      .convert(context.as_ref(), || StateListener::Label(label.downgrade()));
+    let label_name = self.label.convert(
+      context.as_ref(),
+      || StateListener::Label(label.downgrade()),
+      label.downgrade(),
+    );
     label.set_label(&label_name);
     label.upcast()
   }

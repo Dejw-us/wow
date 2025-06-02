@@ -26,9 +26,11 @@ impl ButtonConfig {
 impl Render for ButtonConfig {
   fn render(&self, context: Rc<Context>) -> Widget {
     let button = Button::builder().build();
-    let label = self.label.convert(context.as_ref(), || {
-      StateListener::Button(button.downgrade())
-    });
+    let label = self.label.convert(
+      context.as_ref(),
+      || StateListener::Button(button.downgrade()),
+      button.downgrade(),
+    );
     button.set_label(&label);
 
     self.on_click.if_some(|on_click| {
