@@ -1,11 +1,14 @@
 use crate::config::widget::button::ButtonConfig;
 use crate::config::widget::label::LabelConfig;
 use crate::context::Context;
+use serde::Deserialize;
 use std::rc::Rc;
 
 pub mod button;
 pub mod label;
 
+#[derive(Deserialize, Debug)]
+#[serde(tag = "type", rename_all = "lowercase")]
 pub enum Widget {
   Label(LabelConfig),
   Button(ButtonConfig),

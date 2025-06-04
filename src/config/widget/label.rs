@@ -4,8 +4,10 @@ use crate::state::listener::StateListener;
 use crate::text::Text;
 use gtk4::prelude::{Cast, ObjectExt};
 use gtk4::Label;
+use serde::Deserialize;
 use std::rc::Rc;
 
+#[derive(Deserialize, Debug)]
 pub struct LabelConfig {
   label: Text,
 }

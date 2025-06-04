@@ -5,6 +5,7 @@ use chrono::Local;
 use gtk4::glib::{timeout_add_local, ControlFlow, WeakRef};
 use gtk4::prelude::{ButtonExt, ObjectType};
 use gtk4::{Button, Label};
+use serde::{Deserialize, Deserializer};
 use std::time::Duration;
 
 pub trait TextDisplay: ObjectType {
@@ -32,10 +33,26 @@ impl TextDisplay for Label {
   }
 }
 
+#[derive(Debug)]
 pub enum Text {
   Text(String),
   State(String),
   Clock(String, u64),
+}
+
+impl<'de> Deserialize<'de> for Text {
+  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  where
+    D: Deserializer<'de>,
+  {
+    let s = String::deserialize(deserializer)?;
+
+    match s {
+      s if s.eq("__CLOCK__") => Ok(Self::Clock("%Y-%m-%d %H:%M:%S".to_string(), 1000)),
+      s if s.starts_with("$") => Ok(Self::State(s[1..].to_string())),
+      _ => Ok(Self::Text(s)),
+    }
+  }
 }
 
 impl Text {

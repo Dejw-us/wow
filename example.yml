@@ -1,12 +1,17 @@
-test:
-  type: container
-  label: $state(message)
-  state:
-    message: wow
-  on-click: $setState(message, hello)
-  spacing: 0
-  orientation: horizontal
-  margin:  
-    left: 1
+$message: hello
+
+child:
+  type: button
+  label: $message
+  on-click: $log hello
+
+anchor:
+  - top
+  - left
+  - right
+layer: top
+
+style:
+  file: style.css
   classes:
     - hello

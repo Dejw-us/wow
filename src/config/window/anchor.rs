@@ -1,6 +1,8 @@
 use gtk4_layer_shell::Edge;
+use serde::Deserialize;
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
 pub enum WindowAnchor {
   Top,
   Bottom,

@@ -1,6 +1,8 @@
 use gtk4_layer_shell::Layer;
+use serde::Deserialize;
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
 pub enum WindowLayer {
   Background,
   Bottom,

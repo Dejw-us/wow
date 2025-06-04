@@ -1,9 +1,5 @@
-use crate::config::widget::button::ButtonConfig;
-use crate::config::widget::Widget;
-use crate::config::window::WindowConfig;
 use crate::context::Context;
 use crate::listener::message::Message;
-use crate::text::Text;
 use gtk4::prelude::{ApplicationExt, ApplicationExtManual};
 use gtk4::{glib, Application};
 use std::fs::{metadata, remove_file};
@@ -52,10 +48,7 @@ impl AppListener {
               context.set_state_value(&name, value);
             }
             Message::OpenWindow(name) => {
-              let window = WindowConfig::with_child(Widget::Button(ButtonConfig::with_label(
-                Text::Clock("%Y-%m-%d %H:%M:%S".to_string(), 1000),
-              )));
-              window.render(&app, context.clone());
+              Context::open_window(context.clone(), "example", &app);
             }
           }
         }

@@ -1,16 +1,29 @@
+use crate::config::window::WindowConfig;
+use crate::peek::OptionPeek;
 use crate::state::{State, StateValue};
+use gtk4::Application;
 use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
+use std::rc::Rc;
 
 pub struct Context {
   states: RefCell<HashMap<String, State>>,
+  windows: HashMap<String, WindowConfig>,
 }
 
 impl Context {
-  pub fn with_states(states: HashMap<String, State>) -> Self {
+  pub fn new(states: HashMap<String, State>, windows: HashMap<String, WindowConfig>) -> Self {
     Self {
       states: RefCell::new(states),
+      windows,
     }
+  }
+
+  pub fn open_window(context: Rc<Self>, name: &str, app: &Application) {
+    context
+      .windows
+      .get(name)
+      .if_some(|w| w.render(app, context.clone()))
   }
 
   pub fn set_state_value(&self, key: &str, value: StateValue) {

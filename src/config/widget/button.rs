@@ -8,10 +8,13 @@ use crate::state::StateValue;
 use crate::text::Text;
 use gtk4::prelude::{ButtonExt, Cast, ObjectExt, WidgetExt};
 use gtk4::{Button, Widget};
+use serde::Deserialize;
 use std::rc::Rc;
 
+#[derive(Deserialize, Debug)]
 pub struct ButtonConfig {
   label: Text,
+  #[serde(rename = "on-click")]
   on_click: Option<Action>,
   style: Option<Style>,
 }
