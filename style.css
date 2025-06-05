@@ -1,3 +1,4 @@
 .hello {
-   background-color: red;
+    background: red;
+    margin: 10px;
 }

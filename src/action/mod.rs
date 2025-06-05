@@ -23,12 +23,17 @@ impl<'de> Deserialize<'de> for Action {
     let s = String::deserialize(deserializer)?;
 
     match s {
-      s if s.starts_with("$log") => Ok(Action::Log(s[5..].to_string())),
-      s if s.starts_with("$set") => {
-        let split: Vec<_> = s.splitn(3, &s).into_iter().collect();
+      s if s.starts_with("LOG") => Ok(Action::Log(s[4..].to_string())),
+      s if s.starts_with("$") => {
+        println!("fdsfdsfdsfdsf");
+        let s = s.trim().replace(" ", "");
+        let i = s.find("=").unwrap();
+        let name = &s[1..i];
+        let value = &s[i + 1..];
+        println!("${}={}", name, value);
         Ok(Action::SetState(
-          split[1].to_string(),
-          StateValue::String(split[2].to_string()),
+          name.to_string(),
+          StateValue::String(value.to_string()),
         ))
       }
       _ => Ok(Action::None),

@@ -8,8 +8,8 @@ pub mod listener;
 #[derive(Debug, Clone)]
 pub enum StateValue {
   String(String),
-  Int(i32),
-  Float(f32),
+  Int(i64),
+  Float(f64),
 }
 
 impl Display for StateValue {

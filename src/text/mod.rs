@@ -48,7 +48,7 @@ impl<'de> Deserialize<'de> for Text {
     let s = String::deserialize(deserializer)?;
 
     match s {
-      s if s.eq("__CLOCK__") => Ok(Self::Clock("%Y-%m-%d %H:%M:%S".to_string(), 1000)),
+      s if s.eq("CLOCK") => Ok(Self::Clock("%Y-%m-%d %H:%M:%S".to_string(), 1000)),
       s if s.starts_with("$") => Ok(Self::State(s[1..].to_string())),
       _ => Ok(Self::Text(s)),
     }

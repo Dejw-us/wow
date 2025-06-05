@@ -3,8 +3,10 @@ $message: hello
 child:
   type: button
   label: $message
-  on-click: $log hello
-
+  on-click: $message = 12
+  style:
+    classes:
+      - hello
 anchor:
   - top
   - left
@@ -14,4 +16,3 @@ layer: top
 style:
   file: style.css
   classes:
-    - hello

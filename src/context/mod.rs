@@ -27,6 +27,7 @@ impl Context {
   }
 
   pub fn set_state_value(&self, key: &str, value: StateValue) {
+    println!("Adding state {} = {}", key, value);
     let mut states = self.states.borrow_mut();
     match states.get(key) {
       None => {

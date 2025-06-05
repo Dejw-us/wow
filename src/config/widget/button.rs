@@ -7,7 +7,7 @@ use crate::state::listener::StateListener;
 use crate::state::StateValue;
 use crate::text::Text;
 use gtk4::prelude::{ButtonExt, Cast, ObjectExt, WidgetExt};
-use gtk4::{Button, Widget};
+use gtk4::{Align, Button, Widget};
 use serde::Deserialize;
 use std::rc::Rc;
 
@@ -38,8 +38,10 @@ impl Render for ButtonConfig {
       button.downgrade(),
     );
     button.set_label(&label);
-
+    button.set_halign(Align::Center);
+    button.set_width_request(400);
     self.style.if_some(|style| {
+      println!("Adding css to button");
       style.add_classes(&button);
       style.provider(button.display());
     });
