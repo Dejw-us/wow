@@ -4,6 +4,7 @@ use crate::state::{State, StateValue};
 use gtk4::Application;
 use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
+use std::fs;
 use std::rc::Rc;
 
 pub struct Context {
@@ -12,11 +13,53 @@ pub struct Context {
 }
 
 impl Context {
-  pub fn new(states: HashMap<String, State>, windows: HashMap<String, WindowConfig>) -> Self {
-    Self {
-      states: RefCell::new(states),
+  pub fn load() -> std::io::Result<Self> {
+    let config_dir = "~/.config/wow";
+    let windows_dir = format!("{}/{}", config_dir, "windows");
+    let windows = fs::read_dir(windows_dir)?
+      .filter_map(|e| e.ok())
+      .filter(|e| e.path().is_file())
+      .filter_map(|e| fs::read_to_string(&e.path()).ok().map(|s| (e.file_name(), s))
+      .filter_map(|e| {
+
+        match data {
+          Ok(data) => match serde_yaml::from_str::<WindowConfig>(&data) {
+            Ok(window_config) => {
+              if let Ok(name) = e.file_name().into_string() {
+                Some((name, window_config))
+              } else {
+                None
+              }
+            }
+            Err(_) => {
+              println!(
+                "Failed to create window config from {}. check for syntax error",
+                e.file_name()
+                  .into_string()
+                  .unwrap_or("Invalid filename".to_string())
+              );
+              None
+            }
+          },
+          Err(_) => {
+            println!(
+              "Failed to load window from file {}",
+              e.file_name()
+                .into_string()
+                .unwrap_or("Invalid filename".to_string())
+            );
+            None
+          }
+        }
+      })
+      .collect();
+
+    let context = Context {
       windows,
-    }
+      states: RefCell::new(HashMap::new()),
+    };
+
+    Ok(context)
   }
 
   pub fn open_window(context: Rc<Self>, name: &str, app: &Application) {

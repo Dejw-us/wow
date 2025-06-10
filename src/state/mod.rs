@@ -1,3 +1,4 @@
+use crate::error::Error;
 use crate::state::listener::StateListener;
 use std::cell::{Ref, RefCell};
 use std::fmt::Display;
@@ -10,6 +11,25 @@ pub enum StateValue {
   String(String),
   Int(i64),
   Float(f64),
+}
+
+impl TryFrom<&serde_yaml::Value> for StateValue {
+  type Error = Error;
+  fn try_from(value: &serde_yaml::Value) -> Result<Self, Self::Error> {
+    match value {
+      serde_yaml::Value::String(string) => Ok(Self::String(string.to_string())),
+      serde_yaml::Value::Number(num) => {
+        if let Some(num) = num.as_i64() {
+          Ok(Self::Int(num))
+        } else if let Some(num) = num.as_f64() {
+          Ok(Self::Float(num))
+        } else {
+          Err(Error::Message("Failed to read number".into()))
+        }
+      }
+      _ => Err(Error::Message("Failed to create state value".into())),
+    }
+  }
 }
 
 impl Display for StateValue {
