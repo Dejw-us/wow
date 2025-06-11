@@ -1,13 +1,16 @@
 pub mod button;
+pub mod container;
 pub mod label;
 
 use crate::context::Context;
 use crate::state::listener::StateListener;
 use crate::widget::button::ButtonConfig;
+use crate::widget::container::ContainerConfig;
 use crate::widget::label::LabelConfig;
 use gtk4::glib::WeakRef;
-use gtk4::prelude::{ObjectType, WidgetExt};
+use gtk4::prelude::{BoxExt, Cast, ObjectType, WidgetExt};
 use serde::Deserialize;
+use std::fmt::Debug;
 use std::rc::Rc;
 
 #[derive(Deserialize, Debug)]
@@ -15,6 +18,18 @@ use std::rc::Rc;
 pub enum Widget {
   Label(LabelConfig),
   Button(ButtonConfig),
+  Container(ContainerConfig),
+}
+
+impl ApplyWidget for Vec<Widget> {
+  fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
+    let widget = widget.upcast_ref();
+    if let Some(container) = widget.downcast_ref::<gtk4::Box>() {
+      for child in self.iter() {
+        container.append(&child.render(context.clone()));
+      }
+    }
+  }
 }
 
 pub trait WidgetEssentials {
@@ -29,14 +44,15 @@ impl RenderWidget for Widget {
     match self {
       Widget::Label(label) => label.render(context.clone()),
       Widget::Button(button) => button.render(context.clone()),
+      Widget::Container(container) => container.render(context.clone()),
     }
   }
 }
 
-pub trait RenderWidget {
+pub trait RenderWidget: Debug {
   fn render(&self, context: Rc<Context>) -> gtk4::Widget;
 }
 
-pub trait ApplyWidget {
+pub trait ApplyWidget: Debug {
   fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>);
 }

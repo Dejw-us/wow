@@ -5,6 +5,7 @@ use gtk4::{Button, Label};
 use wow_utils::option::IfSome;
 
 pub enum StateListener {
+  None,
   Label(WeakRef<Label>),
   Button(WeakRef<Button>),
 }
@@ -14,6 +15,7 @@ impl StateListener {
     match self {
       StateListener::Label(weak) => weak.upgrade().if_some(|l| l.set_text(&value.to_string())),
       StateListener::Button(weak) => weak.upgrade().if_some(|b| b.set_text(&value.to_string())),
+      StateListener::None => (),
     }
   }
 }

@@ -13,6 +13,7 @@ pub struct Align {
 
 impl ApplyWidget for Align {
   fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
+    println!("Applying align on {:?}", widget);
     self
       .horizontal
       .if_some(|align| widget.set_halign(align.into()));

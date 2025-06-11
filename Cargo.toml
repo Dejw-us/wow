@@ -4,7 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [workspace]
-members = [ "wow-actions","wow-app", "wow-common", "wow-context", "wow-derive", "wow-states", "wow-text-display", "wow-utils", "wow-widgets", "wow-windows"]
+members = [
+    "wow-core",
+    "wow-derive",
+    "wow-utils",
+]
+
+[dependencies]
+wow-core = { path = "wow-core" }
 
 [workspace.dependencies]
 gtk4 = "0.9.6"
