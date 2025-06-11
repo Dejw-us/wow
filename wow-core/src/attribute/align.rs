@@ -1,7 +1,9 @@
-use crate::config::ApplyWidget;
-use crate::peek::OptionPeek;
+use crate::context::Context;
+use crate::widget::ApplyWidget;
 use gtk4::prelude::WidgetExt;
 use serde::Deserialize;
+use std::rc::Rc;
+use wow_utils::option::IfSome;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Align {
@@ -10,7 +12,7 @@ pub struct Align {
 }
 
 impl ApplyWidget for Align {
-  fn apply(&self, widget: &impl WidgetExt) {
+  fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
     self
       .horizontal
       .if_some(|align| widget.set_halign(align.into()));

@@ -1,8 +1,8 @@
+use crate::display::TextDisplay;
+use crate::state::StateValue;
 use gtk4::glib::WeakRef;
 use gtk4::{Button, Label};
-use wow::peek::OptionPeek;
-use wow::state::StateValue;
-use wow::text::TextDisplay;
+use wow_utils::option::IfSome;
 
 pub enum StateListener {
   Label(WeakRef<Label>),

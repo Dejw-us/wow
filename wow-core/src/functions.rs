@@ -1,4 +1,4 @@
-use crate::config::window::{WindowConfig, WindowConfigStates};
+use crate::window::{WindowConfig, WindowConfigStates};
 use std::fs;
 use std::fs::DirEntry;
 

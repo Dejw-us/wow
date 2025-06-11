@@ -1,18 +1,18 @@
-use crate::config::style::Style;
-use crate::config::widget::{Render, Widget};
-use crate::config::window::anchor::WindowAnchor;
-use crate::config::window::layer::WindowLayer;
-use crate::config::ApplyWidget;
+use crate::attribute::style::Style;
 use crate::context::Context;
-use crate::peek::OptionPeek;
 use crate::state::StateValue;
-use gtk4::prelude::{Cast, GtkWindowExt, WidgetExt};
+use crate::widget::Widget;
+use crate::widget::{ApplyWidget, RenderWidget};
+use crate::window::anchor::WindowAnchor;
+use crate::window::layer::WindowLayer;
+use gtk4::prelude::{GskRendererExt, GtkWindowExt, SettingsExt};
 use gtk4::Application;
 use gtk4_layer_shell::LayerShell;
 use serde::{Deserialize, Deserializer};
 use serde_yaml::Value;
 use std::collections::HashMap;
 use std::rc::Rc;
+use wow_utils::option::IfSome;
 
 pub mod anchor;
 pub mod layer;
@@ -58,10 +58,12 @@ impl WindowConfig {
   pub fn render(&self, app: &Application, context: Rc<Context>) {
     let window = gtk4::Window::builder()
       .application(app)
-      .child(&self.child.render(context))
+      .child(&self.child.render(context.clone()))
       .build();
 
-    self.style.if_some(|style| style.apply(&window));
+    self
+      .style
+      .if_some(|style| style.apply(&window, context.clone()));
 
     self.layer.if_some(|layer| {
       window.init_layer_shell();

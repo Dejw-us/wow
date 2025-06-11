@@ -1,0 +1,15 @@
+[package]
+name = "wow-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+dirs = { workspace = true }
+gtk4 = { workspace = true }
+gtk4-layer-shell = { workspace = true }
+wow-utils = { path = "../wow-utils" }
+wow-derive = { path = "../wow-derive" }
+serde_yaml = { workspace = true }
+chrono = { workspace = true }
+serde = { workspace = true }
+async-channel = { workspace = true }

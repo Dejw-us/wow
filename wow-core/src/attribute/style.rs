@@ -1,11 +1,13 @@
-use crate::config::ApplyWidget;
-use crate::peek::OptionPeek;
-use crate::util::file::read_file_to_string;
+use crate::context::Context;
+use crate::widget::ApplyWidget;
 use gtk4::prelude::WidgetExt;
 use gtk4::{
   style_context_add_provider_for_display, CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION,
 };
 use serde::Deserialize;
+use std::rc::Rc;
+use wow_utils::option::IfSome;
+use wow_utils::read_file_to_string;
 
 #[derive(Deserialize, Debug)]
 pub struct Style {
@@ -14,7 +16,7 @@ pub struct Style {
 }
 
 impl ApplyWidget for Style {
-  fn apply(&self, widget: &impl WidgetExt) {
+  fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
     let display = widget.display();
     let provider = CssProvider::new();
     self.file.if_some(|css| {

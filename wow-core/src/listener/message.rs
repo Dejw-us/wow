@@ -1,4 +1,4 @@
-use wow::state::StateValue;
+use crate::state::StateValue;
 
 #[derive(Debug)]
 pub enum Message {
