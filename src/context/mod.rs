@@ -1,4 +1,4 @@
-use crate::config::window::WindowConfig;
+use crate::config::window::{WindowConfig, WindowConfigStates};
 use crate::peek::OptionPeek;
 use crate::state::{State, StateValue};
 use gtk4::Application;
@@ -7,51 +7,27 @@ use std::collections::HashMap;
 use std::fs;
 use std::rc::Rc;
 
+mod functions;
+
 pub struct Context {
   states: RefCell<HashMap<String, State>>,
-  windows: HashMap<String, WindowConfig>,
+  windows: HashMap<String, (WindowConfig, WindowConfigStates)>,
 }
 
 impl Context {
+  /// Loads context from .config/wow directory
   pub fn load() -> std::io::Result<Self> {
-    let config_dir = "~/.config/wow";
-    let windows_dir = format!("{}/{}", config_dir, "windows");
+    let config_dir = dirs::config_dir()
+      .expect("Failed to get config directory")
+      .to_str()
+      .expect("Failed to convert config directory path to str")
+      .to_string();
+    println!("Config directory: {}", config_dir);
+    let windows_dir = format!("{}/wow/{}", config_dir, "windows");
     let windows = fs::read_dir(windows_dir)?
-      .filter_map(|e| e.ok())
-      .filter(|e| e.path().is_file())
-      .filter_map(|e| fs::read_to_string(&e.path()).ok().map(|s| (e.file_name(), s))
-      .filter_map(|e| {
-
-        match data {
-          Ok(data) => match serde_yaml::from_str::<WindowConfig>(&data) {
-            Ok(window_config) => {
-              if let Ok(name) = e.file_name().into_string() {
-                Some((name, window_config))
-              } else {
-                None
-              }
-            }
-            Err(_) => {
-              println!(
-                "Failed to create window config from {}. check for syntax error",
-                e.file_name()
-                  .into_string()
-                  .unwrap_or("Invalid filename".to_string())
-              );
-              None
-            }
-          },
-          Err(_) => {
-            println!(
-              "Failed to load window from file {}",
-              e.file_name()
-                .into_string()
-                .unwrap_or("Invalid filename".to_string())
-            );
-            None
-          }
-        }
-      })
+      .filter_map(Result::ok)
+      .filter(functions::is_file)
+      .filter_map(functions::to_window_entry)
       .collect();
 
     let context = Context {
@@ -63,10 +39,13 @@ impl Context {
   }
 
   pub fn open_window(context: Rc<Self>, name: &str, app: &Application) {
-    context
-      .windows
-      .get(name)
-      .if_some(|w| w.render(app, context.clone()))
+    context.windows.get(name).if_some(|w| {
+      let window = &w.0;
+      let states = &w.1;
+
+      states.add_states(context.as_ref());
+      window.render(app, context.clone());
+    })
   }
 
   pub fn set_state_value(&self, key: &str, value: StateValue) {

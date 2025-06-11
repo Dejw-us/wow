@@ -31,10 +31,10 @@ impl AppListener {
     }
   }
 
-  pub fn start(self, context: Rc<Context>) {
+  pub fn start(self, context: Context) {
     let (sender, receiver) = async_channel::bounded(1);
     let app = Application::builder().application_id("me.dejw-us").build();
-
+    let context = Rc::new(context);
     app.connect_activate(move |app| {
       let guard = app.hold();
       let receiver = receiver.clone();
@@ -48,7 +48,7 @@ impl AppListener {
               context.set_state_value(&name, value);
             }
             Message::OpenWindow(name) => {
-              Context::open_window(context.clone(), "example", &app);
+              Context::open_window(context.clone(), &name, &app);
             }
           }
         }
