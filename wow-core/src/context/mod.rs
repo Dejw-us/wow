@@ -1,5 +1,6 @@
 use crate::functions;
 use crate::state::{State, StateValue};
+use crate::widget::Widget;
 use crate::window::{WindowConfig, WindowConfigStates};
 use gtk4::Application;
 use std::cell::{Ref, RefCell};
@@ -10,6 +11,7 @@ use wow_utils::option::IfSome;
 
 pub struct Context {
   states: RefCell<HashMap<String, State>>,
+  custom_widgets: HashMap<String, Widget>,
   windows: HashMap<String, (WindowConfig, WindowConfigStates)>,
 }
 
@@ -23,22 +25,45 @@ impl Context {
       .to_string();
     println!("Config directory: {}", config_dir);
     let windows_dir = format!("{}/wow/{}", config_dir, "windows");
+    let widgets_dir = format!("{}/wow/{}", config_dir, "widgets");
     let windows = fs::read_dir(windows_dir)?
       .filter_map(Result::ok)
       .filter(functions::is_file)
       .filter_map(functions::to_window_entry)
       .collect();
-
+    let widgets = fs::read_dir(widgets_dir)?
+      .filter_map(Result::ok)
+      .filter(functions::is_file)
+      .filter_map(|f| {
+        let file_name = f
+          .file_name()
+          .to_string_lossy()
+          .strip_suffix(".yml")
+          .ok_or("Failed to strip .yml suffix")
+          .unwrap()
+          .to_string();
+        let content = fs::read_to_string(f.path()).unwrap();
+        let widget = serde_yaml::from_str::<Widget>(&content).unwrap();
+        println!("Adding widget {:?}", &file_name);
+        Some((file_name, widget))
+      })
+      .collect();
     let context = Context {
       windows,
+      custom_widgets: widgets,
       states: RefCell::new(HashMap::new()),
     };
 
     Ok(context)
   }
 
+  pub fn get_custom_widget(&self, name: &str) -> Option<&Widget> {
+    self.custom_widgets.get(name)
+  }
+
   pub fn open_window(context: Rc<Self>, name: &str, app: &Application) {
     context.windows.get(name).if_some(|w| {
+      println!("Opening window {}", name);
       let window = &w.0;
       let states = &w.1;
 
