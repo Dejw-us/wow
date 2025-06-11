@@ -2,6 +2,7 @@ use crate::config::style::Style;
 use crate::config::widget::{Render, Widget};
 use crate::config::window::anchor::WindowAnchor;
 use crate::config::window::layer::WindowLayer;
+use crate::config::ApplyWidget;
 use crate::context::Context;
 use crate::peek::OptionPeek;
 use crate::state::StateValue;
@@ -54,25 +55,13 @@ impl<'de> Deserialize<'de> for WindowConfigStates {
 }
 
 impl WindowConfig {
-  pub fn with_child(child: Widget) -> WindowConfig {
-    WindowConfig {
-      child,
-      anchor: vec![WindowAnchor::Top, WindowAnchor::Left, WindowAnchor::Right],
-      layer: Some(WindowLayer::Top),
-      style: Some(Style::new()),
-    }
-  }
-
   pub fn render(&self, app: &Application, context: Rc<Context>) {
     let window = gtk4::Window::builder()
       .application(app)
       .child(&self.child.render(context))
       .build();
 
-    self.style.if_some(|style| {
-      style.add_classes(&window);
-      style.provider(window.display());
-    });
+    self.style.if_some(|style| style.apply(&window));
 
     self.layer.if_some(|layer| {
       window.init_layer_shell();

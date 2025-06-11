@@ -1,13 +1,14 @@
 use crate::action::Action;
+use crate::config::geometry::Geometry;
 use crate::config::style::Style;
 use crate::config::widget::Render;
+use crate::config::{align, ApplyWidget};
 use crate::context::Context;
 use crate::peek::OptionPeek;
 use crate::state::listener::StateListener;
-use crate::state::StateValue;
 use crate::text::Text;
-use gtk4::prelude::{ButtonExt, Cast, ObjectExt, WidgetExt};
-use gtk4::{Align, Button, Widget};
+use gtk4::prelude::{ButtonExt, Cast, ObjectExt};
+use gtk4::{Button, Widget};
 use serde::Deserialize;
 use std::rc::Rc;
 
@@ -17,16 +18,8 @@ pub struct ButtonConfig {
   #[serde(rename = "on-click")]
   on_click: Option<Action>,
   style: Option<Style>,
-}
-
-impl ButtonConfig {
-  pub fn with_label(label: Text) -> Self {
-    ButtonConfig {
-      label,
-      on_click: Some(Action::SetState("test".into(), StateValue::Int(100))),
-      style: Some(Style::new()),
-    }
-  }
+  geometry: Option<Geometry>,
+  align: Option<align::Align>,
 }
 
 impl Render for ButtonConfig {
@@ -37,14 +30,14 @@ impl Render for ButtonConfig {
       || StateListener::Button(button.downgrade()),
       button.downgrade(),
     );
+
     button.set_label(&label);
-    button.set_halign(Align::Center);
-    button.set_width_request(400);
-    self.style.if_some(|style| {
-      println!("Adding css to button");
-      style.add_classes(&button);
-      style.provider(button.display());
-    });
+
+    self.align.if_some(|align| align.apply(&button));
+
+    self.geometry.if_some(|g| g.apply(&button));
+
+    self.style.if_some(|style| style.apply(&button));
 
     self.on_click.if_some(|on_click| {
       let on_click = on_click.clone();
