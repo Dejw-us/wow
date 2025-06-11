@@ -1,5 +1,5 @@
 use crate::context::Context;
-use crate::listener::message::Message;
+use wow_actions::::message::Message;
 use gtk4::prelude::{ApplicationExt, ApplicationExtManual};
 use gtk4::{glib, Application};
 use std::fs::{metadata, remove_file};

@@ -3,6 +3,16 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-actions/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-app/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-common/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-context/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-derive/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-states/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-text-display/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-utils/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-widgets/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-windows/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
