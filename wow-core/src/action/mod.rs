@@ -15,6 +15,10 @@ pub mod log;
 pub mod request;
 pub mod set_state;
 
+pub trait TryFromRawAction: Sized {
+  fn try_from_raw_action<E: de::Error>(action: RawAction) -> Result<Self, E>;
+}
+
 pub trait RunAction: Any {
   fn as_any(&self) -> &dyn Any;
   fn run(&self, context: Rc<Context>) -> Value;
@@ -112,12 +116,9 @@ impl<'de> Deserialize<'de> for Action {
     let raw_action = RawAction::parse(&s).map_err(serde::de::Error::custom)?;
 
     match raw_action.name.as_str() {
-      "log" => {
-        let log_message = raw_action.de_param(0)?;
-        Ok(Self {
-          inner: Rc::new(LogAction::new(log_message)),
-        })
-      }
+      "log" => Ok(Action {
+        inner: Rc::new(LogAction::try_from_raw_action(raw_action)?),
+      }),
       _ => Err(serde::de::Error::custom(format!(
         "Invalid action name: {}",
         raw_action.name
