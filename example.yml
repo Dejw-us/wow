@@ -1,9 +1,9 @@
-$message: request(get, localhost:8080)
+$message: request(get, {name = 12})
 
 child:
   type: button
   label: $message
-  on-click: $message = 12
+  on-click: ~request(get, localhost:8080)
   style:
     classes:
       - hello

@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Object {
   pub fields: HashMap<String, Field>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub enum Field {
   Value(String),
   Object(Object),

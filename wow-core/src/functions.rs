@@ -2,6 +2,26 @@ use crate::window::{WindowConfig, WindowConfigStates};
 use std::fs;
 use std::fs::DirEntry;
 
+pub struct Chars;
+
+pub struct Mappings;
+
+impl Mappings {
+  pub fn into<T: Into<E>, E>(into: T) -> E {
+    into.into()
+  }
+}
+
+impl Chars {
+  pub fn is_whitespace(char: &char) -> bool {
+    char.is_whitespace()
+  }
+
+  pub fn not_whitespace(char: &char) -> bool {
+    !Self::is_whitespace(char)
+  }
+}
+
 pub fn is_file(entry: &DirEntry) -> bool {
   entry.path().is_file()
 }

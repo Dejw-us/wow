@@ -5,23 +5,18 @@ use std::any::Any;
 use std::rc::Rc;
 
 #[derive(Clone, Debug)]
-pub enum HttpMethod {
-  Get,
-  Post,
+pub struct SetStateAction {
+  name: String,
+  value: Value,
 }
 
-#[derive(Clone, Debug)]
-pub struct RequestAction {
-  url: String,
-  method: HttpMethod,
-}
-
-impl RunAction for RequestAction {
+impl RunAction for SetStateAction {
   fn as_any(&self) -> &dyn Any {
     self
   }
 
   fn run(&self, context: Rc<Context>) -> Value {
-    Value::String("test".into())
+    context.set_state_value(&self.name, self.value.clone());
+    Value::None
   }
 }

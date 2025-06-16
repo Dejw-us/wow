@@ -13,6 +13,7 @@
       <sourceFolder url="file://$MODULE_DIR$/wow-widgets/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/wow-windows/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/wow-core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wow-core/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

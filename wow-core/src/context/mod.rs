@@ -1,5 +1,6 @@
 use crate::functions;
-use crate::state::{State, StateValue};
+use crate::state::State;
+use crate::value::Value;
 use crate::widget::Widget;
 use crate::window::{WindowConfig, WindowConfigStates};
 use gtk4::Application;
@@ -72,8 +73,8 @@ impl Context {
     })
   }
 
-  pub fn set_state_value(&self, key: &str, value: StateValue) {
-    println!("Adding state {} = {}", key, value);
+  pub fn set_state_value(&self, key: &str, value: Value) {
+    println!("Adding state {} = {:?}", key, value);
     let mut states = self.states.borrow_mut();
     match states.get(key) {
       None => {

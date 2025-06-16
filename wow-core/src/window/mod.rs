@@ -1,6 +1,5 @@
 use crate::attribute::style::Style;
 use crate::context::Context;
-use crate::state::StateValue;
 use crate::widget::Widget;
 use crate::widget::{ApplyWidget, RenderWidget};
 use crate::window::anchor::WindowAnchor;
@@ -26,7 +25,7 @@ pub struct WindowConfig {
 }
 
 pub struct WindowConfigStates {
-  states: HashMap<String, StateValue>,
+  states: HashMap<String, crate::value::Value>,
 }
 
 impl WindowConfigStates {
@@ -43,13 +42,14 @@ impl<'de> Deserialize<'de> for WindowConfigStates {
   where
     D: Deserializer<'de>,
   {
-    let data: HashMap<String, StateValue> = HashMap::<String, Value>::deserialize(deserializer)?
-      .iter()
-      .filter_map(|(name, value)| match StateValue::try_from(value) {
-        Ok(value) => Some((name[1..].to_string(), value)),
-        Err(_) => None,
-      })
-      .collect();
+    let data: HashMap<String, crate::value::Value> =
+      HashMap::<String, Value>::deserialize(deserializer)?
+        .iter()
+        .filter_map(|(name, value)| match crate::value::Value::from(value) {
+          crate::value::Value::None => None,
+          value => Some((name.to_string(), value)),
+        })
+        .collect();
     Ok(Self { states: data })
   }
 }

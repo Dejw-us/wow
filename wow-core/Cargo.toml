@@ -13,3 +13,7 @@ serde_yaml = { workspace = true }
 chrono = { workspace = true }
 serde = { workspace = true }
 async-channel = { workspace = true }
+log = { workspace = true }
+log4rs = { workspace = true }
+derive-new = "0.7.0"
+getset = "0.1.5"

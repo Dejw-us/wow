@@ -12,6 +12,7 @@ members = [
 
 [dependencies]
 wow-core = { path = "wow-core" }
+log4rs = { workspace = true }
 
 [workspace.dependencies]
 gtk4 = "0.9.6"
@@ -21,3 +22,6 @@ gtk4-layer-shell = "0.5.0"
 serde_yaml = "0.9.34+deprecated"
 serde = { version = "1.0.219", features = ["derive"] }
 dirs = "6.0.0"
+log = "0.4.27"
+env_logger = "0.11.8"
+log4rs = "1.4.0-rc1"

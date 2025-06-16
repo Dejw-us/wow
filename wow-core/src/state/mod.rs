@@ -1,5 +1,6 @@
 use crate::result::Error;
 use crate::state::listener::StateListener;
+use crate::value::Value;
 use std::cell::{Ref, RefCell};
 use std::fmt::Display;
 use std::sync::Arc;
@@ -44,12 +45,12 @@ impl Display for StateValue {
 }
 
 pub struct State {
-  value: Arc<RefCell<StateValue>>,
+  value: Arc<RefCell<Value>>,
   listeners: RefCell<Vec<StateListener>>,
 }
 
 impl State {
-  pub fn new(value: StateValue) -> State {
+  pub fn new(value: Value) -> State {
     State {
       value: Arc::new(RefCell::new(value)),
       listeners: RefCell::new(Vec::new()),
@@ -60,14 +61,14 @@ impl State {
     self.listeners.borrow_mut().push(listener);
   }
 
-  pub fn set(&self, value: StateValue) {
+  pub fn set(&self, value: Value) {
     for listener in self.listeners.borrow().iter() {
       listener.run(&value);
     }
     *self.value.borrow_mut() = value;
   }
 
-  pub fn get(&self) -> Ref<'_, StateValue> {
+  pub fn get(&self) -> Ref<'_, Value> {
     self.value.borrow()
   }
 }

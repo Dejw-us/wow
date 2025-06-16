@@ -1,45 +1,103 @@
-use crate::action::request::RequestAction;
+use crate::action::log::LogAction;
 use crate::context::Context;
-use crate::object::Object;
-use crate::state::StateValue;
+use crate::functions::{Chars, Mappings};
+use crate::value::Value;
 use crate::widget::ApplyWidget;
+use getset::Getters;
 use gtk4::prelude::{ButtonExt, Cast, WidgetExt};
 use gtk4::Button;
-use serde::{Deserialize, Deserializer};
+use serde::{de, Deserialize, Deserializer};
+use std::any::Any;
+use std::fmt::{Debug, Display};
 use std::rc::Rc;
 
+pub mod log;
 pub mod request;
+pub mod set_state;
 
-pub enum ReturnAction {
-  Request(RequestAction),
+pub trait RunAction: Any {
+  fn as_any(&self) -> &dyn Any;
+  fn run(&self, context: Rc<Context>) -> Value;
 }
 
-pub enum UnitAction {
-  Log(String),
-  SetState(String, StateValue),
+pub struct Action {
+  pub inner: Rc<dyn RunAction>,
 }
 
-pub enum Action {
-  Return(ReturnAction),
-  Unit(UnitAction),
+impl Action {
+  pub fn clone_inner(&self) -> Rc<dyn RunAction> {
+    self.inner.clone()
+  }
 }
 
-pub enum ActionResult {
-  Object(Object),
-  String(String),
-  None,
+impl Debug for Action {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Action")
+  }
 }
 
-#[derive(Debug, Clone)]
-pub struct Path(Vec<String>);
+impl RunAction for Action {
+  fn as_any(&self) -> &dyn Any {
+    self
+  }
+
+  fn run(&self, context: Rc<Context>) -> Value {
+    self.inner.run(context)
+  }
+}
+
+#[derive(Getters)]
+pub struct RawAction {
+  #[get = "pub"]
+  name: String,
+  params: Vec<String>,
+}
+
+impl RawAction {
+  pub fn param(&self, i: usize) -> Option<&String> {
+    self.params.get(i)
+  }
+
+  pub fn de_param<E: de::Error>(&self, i: usize) -> Result<String, E> {
+    match self.param(i) {
+      None => Err(E::custom("param not found")),
+      Some(p) => Ok(p.to_owned()),
+    }
+  }
+
+  pub fn parse(s: &str) -> Result<Self, String> {
+    let s = match s.strip_prefix("~") {
+      None => return Err("Actions need to start with ~".into()),
+      Some(s) => s,
+    };
+
+    match s.find("(") {
+      None => return Err("Invalid syntax. Expected ()".into()),
+      Some(i) => {
+        let name = &s[..i];
+        let params = &s[(i + 1)..];
+        let params: String = params[..params.len() - 1]
+          .chars()
+          .filter(Chars::not_whitespace)
+          .collect();
+        let params: Vec<String> = params.split(",").map(Mappings::into).collect();
+
+        Ok(RawAction {
+          name: name.to_string(),
+          params,
+        })
+      }
+    }
+  }
+}
 
 impl ApplyWidget for Action {
   fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
     let widget = widget.upcast_ref::<gtk4::Widget>();
     if let Some(button) = widget.downcast_ref::<Button>() {
-      let action = self.clone();
+      let inner = self.inner.clone();
       button.connect_clicked(move |_| {
-        action.run(context.clone());
+        inner.run(context.clone());
       });
     }
   }
@@ -51,39 +109,19 @@ impl<'de> Deserialize<'de> for Action {
     D: Deserializer<'de>,
   {
     let s = String::deserialize(deserializer)?;
+    let raw_action = RawAction::parse(&s).map_err(serde::de::Error::custom)?;
 
-    match s {
-      s if s.starts_with("LOG") => Ok(Action::Log(s[4..].to_string())),
-      s if s.starts_with("$") => {
-        println!("fdsfdsfdsfdsf");
-        let s = s.trim().replace(" ", "");
-        let i = s.find("=").unwrap();
-        let name = &s[1..i];
-        let value = &s[i + 1..];
-        println!("${}={}", name, value);
-        Ok(Action::SetState(
-          name.to_string(),
-          StateValue::String(value.to_string()),
-        ))
+    match raw_action.name.as_str() {
+      "log" => {
+        let log_message = raw_action.de_param(0)?;
+        Ok(Self {
+          inner: Rc::new(LogAction::new(log_message)),
+        })
       }
-      _ => Ok(Action::None),
-    }
-  }
-}
-
-impl Action {
-  pub fn run(&self, context: Rc<Context>) -> ActionResult {
-    match self {
-      Action::Log(text) => {
-        println!("{}", text);
-        ActionResult::None
-      }
-      Action::SetState(name, value) => {
-        context.set_state_value(name, value.clone());
-        println!("Set {} to {}", name, value);
-        ActionResult::None
-      }
-      Action::None => ActionResult::None,
+      _ => Err(serde::de::Error::custom(format!(
+        "Invalid action name: {}",
+        raw_action.name
+      ))),
     }
   }
 }
