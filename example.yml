@@ -1,4 +1,4 @@
-$message: hello
+$message: request(get, localhost:8080)
 
 child:
   type: button

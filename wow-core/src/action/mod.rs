@@ -1,4 +1,6 @@
+use crate::action::request::RequestAction;
 use crate::context::Context;
+use crate::object::Object;
 use crate::state::StateValue;
 use crate::widget::ApplyWidget;
 use gtk4::prelude::{ButtonExt, Cast, WidgetExt};
@@ -6,17 +8,30 @@ use gtk4::Button;
 use serde::{Deserialize, Deserializer};
 use std::rc::Rc;
 
+pub mod request;
+
+pub enum ReturnAction {
+  Request(RequestAction),
+}
+
+pub enum UnitAction {
+  Log(String),
+  SetState(String, StateValue),
+}
+
+pub enum Action {
+  Return(ReturnAction),
+  Unit(UnitAction),
+}
+
 pub enum ActionResult {
+  Object(Object),
   String(String),
   None,
 }
 
-#[derive(Clone, Debug)]
-pub enum Action {
-  Log(String),
-  SetState(String, StateValue),
-  None,
-}
+#[derive(Debug, Clone)]
+pub struct Path(Vec<String>);
 
 impl ApplyWidget for Action {
   fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
