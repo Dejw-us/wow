@@ -3,10 +3,8 @@ use crate::attribute::align;
 use crate::attribute::geometry::Geometry;
 use crate::attribute::style::Style;
 use crate::display::Text;
-use crate::state::listener::StateListener;
 use crate::widget::WidgetEssentials;
-use gtk4::glib::WeakRef;
-use gtk4::prelude::WidgetExt;
+use gtk4::prelude::{Cast, WidgetExt};
 use gtk4::Button;
 use serde::Deserialize;
 use wow_derive::RenderWidget;
@@ -22,13 +20,7 @@ pub struct ButtonConfig {
 }
 
 impl WidgetEssentials for ButtonConfig {
-  type Widget = Button;
-
-  fn build() -> Self::Widget {
-    Button::builder().build()
-  }
-
-  fn listener(widget: WeakRef<Self::Widget>) -> StateListener {
-    StateListener::Button(widget)
+  fn build() -> gtk4::Widget {
+    Button::builder().build().upcast()
   }
 }

@@ -12,7 +12,7 @@ pub struct Align {
 }
 
 impl ApplyWidget for Align {
-  fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
+  fn apply(&self, widget: &gtk4::Widget, context: Rc<Context>) {
     println!("Applying align on {:?}", widget);
     self
       .horizontal

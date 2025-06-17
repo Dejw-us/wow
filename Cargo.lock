@@ -1528,6 +1528,7 @@ dependencies = [
 name = "wow"
 version = "0.1.0"
 dependencies = [
+ "log",
  "log4rs",
  "wow-core",
 ]

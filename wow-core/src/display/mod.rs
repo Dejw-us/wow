@@ -1,14 +1,29 @@
+use crate::action::raw::RawAction;
+use crate::action::traits::RunAction;
 use crate::context::Context;
 use crate::state::listener::StateListener;
-use chrono::Local;
-use gtk4::glib::{timeout_add_local, ControlFlow, WeakRef};
-use gtk4::prelude::{ButtonExt, ObjectType};
-use gtk4::{Button, Label};
+use crate::widget::ApplyWidget;
+use gtk4::prelude::{ButtonExt, Cast, IsA, ObjectExt, ObjectType};
+use gtk4::{Button, Label, Widget};
 use serde::{Deserialize, Deserializer};
-use std::time::Duration;
-use wow_utils::option::IfSome;
+use serde_yaml::Value;
+use std::rc::Rc;
 
-pub trait TextDisplay: ObjectType {
+pub trait TrySetText {
+  fn try_set_text(&self, text: &str);
+}
+
+impl TrySetText for Widget {
+  fn try_set_text(&self, text: &str) {
+    if let Some(button) = self.downcast_ref::<Button>() {
+      button.set_label(text);
+    } else if let Some(label) = self.downcast_ref::<Label>() {
+      label.set_text(text);
+    }
+  }
+}
+
+pub trait TextDisplay: ObjectType + IsA<gtk4::Widget> {
   fn get_text(&self) -> String;
   fn set_text(&self, text: &str);
 }
@@ -35,9 +50,9 @@ impl TextDisplay for Label {
 
 #[derive(Debug)]
 pub enum Text {
+  Action(crate::action::Action),
   Text(String),
   State(String),
-  Clock(String, u64),
 }
 
 impl<'de> Deserialize<'de> for Text {
@@ -45,45 +60,47 @@ impl<'de> Deserialize<'de> for Text {
   where
     D: Deserializer<'de>,
   {
-    let s = String::deserialize(deserializer)?;
-
+    let s = serde_yaml::Value::deserialize(deserializer)?;
+    // TODO cleanup
+    let s = match s {
+      Value::Null => String::new(),
+      Value::Bool(bool) => bool.to_string(),
+      Value::Number(num) => num.to_string(),
+      Value::String(string) => string,
+      Value::Sequence(_) => String::new(),
+      Value::Mapping(_) => String::new(),
+      Value::Tagged(_) => String::new(),
+    };
     match s {
-      s if s.eq("CLOCK") => Ok(Self::Clock("%Y-%m-%d %H:%M:%S".to_string(), 1000)),
       s if s.starts_with("$") => Ok(Self::State(s[1..].to_string())),
-      _ => Ok(Self::Text(s)),
+      s if s.starts_with("~") => {
+        let raw = RawAction::parse(s.as_str()).map_err(serde::de::Error::custom)?;
+        let action: crate::action::Action =
+          raw.try_into().map_err(|e| serde::de::Error::custom(e))?;
+        Ok(Self::Action(action))
+      }
+      _ => Ok(Self::Text(s.to_string())),
     }
   }
 }
 
-impl Text {
-  pub fn convert(
-    &self,
-    context: &Context,
-    listener: impl Fn() -> StateListener,
-    weak: WeakRef<impl TextDisplay>,
-  ) -> String {
+impl ApplyWidget for Text {
+  fn apply(&self, widget: &gtk4::Widget, context: Rc<Context>) {
+    let weak = widget.downgrade();
     match self {
-      Text::Text(text) => text.into(),
+      Text::Action(action) => {
+        let value = action.run(context.clone(), weak.clone());
+        widget.try_set_text(&value.to_string());
+      }
+      Text::Text(text) => widget.try_set_text(text),
       Text::State(state_name) => {
         if let Some(state) = context.get_state(state_name) {
-          state.subscribe(listener());
-          state.get().to_string()
+          state.subscribe(StateListener::Widget(weak));
+          widget.try_set_text(&state.get().to_string());
         } else {
-          panic!("Failed to find state");
+          panic!("Failed to find state {}", state_name);
         }
       }
-      Text::Clock(format, update_rate) => {
-        let now = Local::now();
-        let time_local = now.format(&format).to_string();
-        let format = format.to_string();
-        timeout_add_local(Duration::from_millis(update_rate.clone()), move || {
-          let now = Local::now();
-          let time = now.format(&format).to_string();
-          weak.upgrade().if_some(|label| label.set_text(&time));
-          ControlFlow::Continue
-        });
-        time_local
-      }
-    }
+    };
   }
 }

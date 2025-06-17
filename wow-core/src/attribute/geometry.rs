@@ -14,7 +14,7 @@ pub struct Geometry {
 }
 
 impl ApplyWidget for Geometry {
-  fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
+  fn apply(&self, widget: &gtk4::Widget, context: Rc<Context>) {
     self.min_width.if_some(|w| widget.set_width_request(*w));
     self.min_height.if_some(|h| widget.set_height_request(*h));
   }

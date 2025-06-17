@@ -22,16 +22,7 @@ pub fn impl_render_widget(token: DeriveInput) -> TokenStream {
   let statements: Vec<_> = fields
     .iter()
     .map(|(ident, ty)| {
-      if is_text_type(ty) {
-        quote! {
-          let label = self.#ident.convert(
-            context.as_ref(),
-            || Self::listener(widget.downgrade()),
-            widget.downgrade(),
-          );
-          widget.set_text(&label);
-        }
-      } else if is_option_type(ty) {
+      if is_option_type(ty) {
         quote! {
           if let Some(a) = &self.#ident {
             a.apply(&widget, context.clone());

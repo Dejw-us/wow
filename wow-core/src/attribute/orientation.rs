@@ -1,6 +1,6 @@
 use crate::context::Context;
 use crate::widget::ApplyWidget;
-use gtk4::prelude::{Cast, OrientableExt, WidgetExt};
+use gtk4::prelude::{Cast, OrientableExt};
 use serde::Deserialize;
 use std::rc::Rc;
 
@@ -12,8 +12,7 @@ pub enum Orientation {
 }
 
 impl ApplyWidget for Orientation {
-  fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
-    let widget = widget.upcast_ref();
+  fn apply(&self, widget: &gtk4::Widget, context: Rc<Context>) {
     if let Some(container) = widget.downcast_ref::<gtk4::Box>() {
       println!("Setting orientation to {:?}", self);
       container.set_orientation(self.into());

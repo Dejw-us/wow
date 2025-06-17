@@ -1,28 +1,29 @@
-use crate::action::log::LogAction;
+use crate::action::raw::RawAction;
+use crate::action::traits::{RunAction, TryFromRawAction};
 use crate::context::Context;
-use crate::functions::{Chars, Mappings};
 use crate::value::Value;
 use crate::widget::ApplyWidget;
-use getset::Getters;
-use gtk4::prelude::{ButtonExt, Cast, WidgetExt};
-use gtk4::Button;
-use serde::{de, Deserialize, Deserializer};
+use gtk4::glib::WeakRef;
+use gtk4::prelude::{ButtonExt, Cast, ObjectExt, WidgetExt};
+use gtk4::{Button, Widget};
+use serde::{Deserialize, Deserializer};
 use std::any::Any;
 use std::fmt::{Debug, Display};
 use std::rc::Rc;
 
+pub mod bool;
+pub mod date;
+pub mod float;
+pub mod int;
 pub mod log;
+pub mod none;
+pub mod raw;
 pub mod request;
 pub mod set_state;
-
-pub trait TryFromRawAction: Sized {
-  fn try_from_raw_action<E: de::Error>(action: RawAction) -> Result<Self, E>;
-}
-
-pub trait RunAction: Any {
-  fn as_any(&self) -> &dyn Any;
-  fn run(&self, context: Rc<Context>) -> Value;
-}
+pub mod string;
+pub mod task;
+pub mod traits;
+mod utils;
 
 pub struct Action {
   pub inner: Rc<dyn RunAction>,
@@ -31,6 +32,12 @@ pub struct Action {
 impl Action {
   pub fn clone_inner(&self) -> Rc<dyn RunAction> {
     self.inner.clone()
+  }
+
+  pub fn new(inner: impl RunAction) -> Self {
+    Self {
+      inner: Rc::new(inner),
+    }
   }
 }
 
@@ -45,63 +52,19 @@ impl RunAction for Action {
     self
   }
 
-  fn run(&self, context: Rc<Context>) -> Value {
-    self.inner.run(context)
-  }
-}
-
-#[derive(Getters)]
-pub struct RawAction {
-  #[get = "pub"]
-  name: String,
-  params: Vec<String>,
-}
-
-impl RawAction {
-  pub fn param(&self, i: usize) -> Option<&String> {
-    self.params.get(i)
-  }
-
-  pub fn de_param<E: de::Error>(&self, i: usize) -> Result<String, E> {
-    match self.param(i) {
-      None => Err(E::custom("param not found")),
-      Some(p) => Ok(p.to_owned()),
-    }
-  }
-
-  pub fn parse(s: &str) -> Result<Self, String> {
-    let s = match s.strip_prefix("~") {
-      None => return Err("Actions need to start with ~".into()),
-      Some(s) => s,
-    };
-
-    match s.find("(") {
-      None => return Err("Invalid syntax. Expected ()".into()),
-      Some(i) => {
-        let name = &s[..i];
-        let params = &s[(i + 1)..];
-        let params: String = params[..params.len() - 1]
-          .chars()
-          .filter(Chars::not_whitespace)
-          .collect();
-        let params: Vec<String> = params.split(",").map(Mappings::into).collect();
-
-        Ok(RawAction {
-          name: name.to_string(),
-          params,
-        })
-      }
-    }
+  fn run(&self, context: Rc<Context>, widget: WeakRef<Widget>) -> Value {
+    self.inner.run(context, widget)
   }
 }
 
 impl ApplyWidget for Action {
-  fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
+  fn apply(&self, widget: &Widget, context: Rc<Context>) {
     let widget = widget.upcast_ref::<gtk4::Widget>();
+    let weak_ref = widget.downgrade();
     if let Some(button) = widget.downcast_ref::<Button>() {
-      let inner = self.inner.clone();
+      let inner = self.clone_inner();
       button.connect_clicked(move |_| {
-        inner.run(context.clone());
+        inner.run(context.clone(), weak_ref.clone());
       });
     }
   }
@@ -114,15 +77,9 @@ impl<'de> Deserialize<'de> for Action {
   {
     let s = String::deserialize(deserializer)?;
     let raw_action = RawAction::parse(&s).map_err(serde::de::Error::custom)?;
-
-    match raw_action.name.as_str() {
-      "log" => Ok(Action {
-        inner: Rc::new(LogAction::try_from_raw_action(raw_action)?),
-      }),
-      _ => Err(serde::de::Error::custom(format!(
-        "Invalid action name: {}",
-        raw_action.name
-      ))),
-    }
+    let action = raw_action
+      .try_into()
+      .map_err(|e| serde::de::Error::custom(e))?;
+    Ok(action)
   }
 }

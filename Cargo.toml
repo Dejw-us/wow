@@ -13,6 +13,7 @@ members = [
 [dependencies]
 wow-core = { path = "wow-core" }
 log4rs = { workspace = true }
+log = "0.4.27"
 
 [workspace.dependencies]
 gtk4 = "0.9.6"

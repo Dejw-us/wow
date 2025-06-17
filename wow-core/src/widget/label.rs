@@ -2,9 +2,8 @@ use crate::attribute::align::Align;
 use crate::attribute::geometry::Geometry;
 use crate::attribute::style::Style;
 use crate::display::Text;
-use crate::state::listener::StateListener;
 use crate::widget::WidgetEssentials;
-use gtk4::glib::WeakRef;
+use gtk4::prelude::Cast;
 use gtk4::Label;
 use serde::Deserialize;
 use wow_derive::RenderWidget;
@@ -18,13 +17,7 @@ pub struct LabelConfig {
 }
 
 impl WidgetEssentials for LabelConfig {
-  type Widget = Label;
-
-  fn build() -> Self::Widget {
-    Label::builder().build()
-  }
-
-  fn listener(widget: WeakRef<Self::Widget>) -> StateListener {
-    StateListener::Label(widget)
+  fn build() -> gtk4::Widget {
+    Label::builder().build().upcast()
   }
 }

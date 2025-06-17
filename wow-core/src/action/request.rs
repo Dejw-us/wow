@@ -1,6 +1,7 @@
 use crate::action::RunAction;
 use crate::context::Context;
 use crate::value::Value;
+use gtk4::glib::WeakRef;
 use std::any::Any;
 use std::rc::Rc;
 
@@ -21,7 +22,7 @@ impl RunAction for RequestAction {
     self
   }
 
-  fn run(&self, context: Rc<Context>) -> Value {
+  fn run(&self, context: Rc<Context>, widget: WeakRef<gtk4::Widget>) -> Value {
     Value::String("test".into())
   }
 }

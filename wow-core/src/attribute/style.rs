@@ -2,7 +2,7 @@ use crate::context::Context;
 use crate::widget::ApplyWidget;
 use gtk4::prelude::WidgetExt;
 use gtk4::{
-  style_context_add_provider_for_display, CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION,
+  style_context_add_provider_for_display, CssProvider, Widget, STYLE_PROVIDER_PRIORITY_APPLICATION,
 };
 use serde::Deserialize;
 use std::rc::Rc;
@@ -16,7 +16,7 @@ pub struct Style {
 }
 
 impl ApplyWidget for Style {
-  fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
+  fn apply(&self, widget: &Widget, context: Rc<Context>) {
     let display = widget.display();
     let provider = CssProvider::new();
     self.file.if_some(|css| {

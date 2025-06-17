@@ -1,8 +1,10 @@
-use crate::action::{RawAction, RunAction, TryFromRawAction};
+use crate::action::traits::TryFromRawAction;
+use crate::action::{RawAction, RunAction};
 use crate::context::Context;
 use crate::value::Value;
 use derive_new::new;
 use getset::Getters;
+use gtk4::glib::WeakRef;
 use serde::de;
 use std::any::Any;
 use std::rc::Rc;
@@ -26,7 +28,7 @@ impl RunAction for LogAction {
     self
   }
 
-  fn run(&self, _context: Rc<Context>) -> Value {
+  fn run(&self, _context: Rc<Context>, widget: WeakRef<gtk4::Widget>) -> Value {
     println!("{}", self.message);
     Value::None
   }

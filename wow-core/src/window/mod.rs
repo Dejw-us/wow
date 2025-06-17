@@ -4,7 +4,7 @@ use crate::widget::Widget;
 use crate::widget::{ApplyWidget, RenderWidget};
 use crate::window::anchor::WindowAnchor;
 use crate::window::layer::WindowLayer;
-use gtk4::prelude::{GskRendererExt, GtkWindowExt, SettingsExt};
+use gtk4::prelude::{Cast, GskRendererExt, GtkWindowExt, SettingsExt};
 use gtk4::Application;
 use gtk4_layer_shell::LayerShell;
 use serde::{Deserialize, Deserializer};
@@ -30,10 +30,10 @@ pub struct WindowConfigStates {
 
 impl WindowConfigStates {
   pub fn add_states(&self, context: &Context) {
-    self
-      .states
-      .iter()
-      .for_each(|(name, state)| context.set_state_value(name, state.clone()));
+    self.states.iter().for_each(|(name, state)| {
+      println!("Adding state {}", name);
+      context.set_state_value(name, state.clone());
+    });
   }
 }
 
@@ -45,9 +45,15 @@ impl<'de> Deserialize<'de> for WindowConfigStates {
     let data: HashMap<String, crate::value::Value> =
       HashMap::<String, Value>::deserialize(deserializer)?
         .iter()
-        .filter_map(|(name, value)| match crate::value::Value::from(value) {
-          crate::value::Value::None => None,
-          value => Some((name.to_string(), value)),
+        .filter_map(|(name, value)| {
+          if name.starts_with("$") {
+            match crate::value::Value::from(value) {
+              crate::value::Value::None => None,
+              value => Some((name[1..].to_string(), value)),
+            }
+          } else {
+            None
+          }
         })
         .collect();
     Ok(Self { states: data })
@@ -63,7 +69,7 @@ impl WindowConfig {
 
     self
       .style
-      .if_some(|style| style.apply(&window, context.clone()));
+      .if_some(|style| style.apply(window.upcast_ref(), context.clone()));
 
     self.layer.if_some(|layer| {
       window.init_layer_shell();

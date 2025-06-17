@@ -3,11 +3,9 @@ pub mod container;
 pub mod label;
 
 use crate::context::Context;
-use crate::state::listener::StateListener;
 use crate::widget::button::ButtonConfig;
 use crate::widget::container::ContainerConfig;
 use crate::widget::label::LabelConfig;
-use gtk4::glib::WeakRef;
 use gtk4::prelude::{BoxExt, Cast, GskRendererExt, ObjectType, WidgetExt};
 use serde::Deserialize;
 use std::fmt::Debug;
@@ -24,8 +22,7 @@ pub enum Widget {
 }
 
 impl ApplyWidget for Vec<Widget> {
-  fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>) {
-    let widget = widget.upcast_ref();
+  fn apply(&self, widget: &gtk4::Widget, context: Rc<Context>) {
     if let Some(container) = widget.downcast_ref::<gtk4::Box>() {
       for child in self.iter() {
         container.append(&child.render(context.clone()));
@@ -35,10 +32,7 @@ impl ApplyWidget for Vec<Widget> {
 }
 
 pub trait WidgetEssentials {
-  type Widget: WidgetExt;
-
-  fn build() -> Self::Widget;
-  fn listener(widget: WeakRef<Self::Widget>) -> StateListener;
+  fn build() -> gtk4::Widget;
 }
 
 impl RenderWidget for Widget {
@@ -63,5 +57,5 @@ pub trait RenderWidget: Debug {
 }
 
 pub trait ApplyWidget: Debug {
-  fn apply(&self, widget: &impl WidgetExt, context: Rc<Context>);
+  fn apply(&self, widget: &gtk4::Widget, context: Rc<Context>);
 }
