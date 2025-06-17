@@ -12,7 +12,7 @@ use wow_utils::read_file_to_string;
 #[derive(Deserialize, Debug)]
 pub struct Style {
   file: Option<String>,
-  classes: Vec<String>,
+  classes: Option<Vec<String>>,
 }
 
 impl ApplyWidget for Style {
@@ -27,8 +27,10 @@ impl ApplyWidget for Style {
         STYLE_PROVIDER_PRIORITY_APPLICATION,
       );
     });
-    for class in self.classes.iter() {
-      widget.add_css_class(class);
+    if let Some(classes) = self.classes.as_ref() {
+      for class in classes.iter() {
+        widget.add_css_class(class);
+      }
     }
   }
 }

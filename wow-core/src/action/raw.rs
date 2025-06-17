@@ -1,12 +1,13 @@
 use crate::action::bool::BoolAction;
 use crate::action::date::DateAction;
+use crate::action::execute::ExecuteAction;
 use crate::action::float::FloatAction;
 use crate::action::int::IntAction;
 use crate::action::log::LogAction;
 use crate::action::none::NoneAction;
+use crate::action::repeat::RepeatAction;
 use crate::action::set_state::SetStateAction;
 use crate::action::string::StringAction;
-use crate::action::task::RepeatAction;
 use crate::action::traits::TryFromRawAction;
 use crate::action::{utils, Action};
 use crate::functions::Mappings;
@@ -52,6 +53,9 @@ impl TryInto<Action> for RawAction {
       "repeat" => Ok(Action::new(
         RepeatAction::try_from_raw_action::<Self::Error>(self)?,
       )),
+      "exec" => Ok(Action::new(ExecuteAction::try_from_raw_action::<
+        Self::Error,
+      >(self)?)),
       _ => Err(serde::de::Error::custom(format!(
         "Invalid action name: {}",
         self.name()

@@ -13,15 +13,16 @@ use std::rc::Rc;
 
 pub mod bool;
 pub mod date;
+pub mod execute;
 pub mod float;
 pub mod int;
 pub mod log;
 pub mod none;
 pub mod raw;
+pub mod repeat;
 pub mod request;
 pub mod set_state;
 pub mod string;
-pub mod task;
 pub mod traits;
 mod utils;
 

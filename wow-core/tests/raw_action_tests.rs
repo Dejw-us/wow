@@ -1,4 +1,4 @@
-use wow_core::action::RawAction;
+use wow_core::action::raw::RawAction;
 
 #[test]
 fn test_raw_action() {
