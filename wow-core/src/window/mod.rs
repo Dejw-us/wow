@@ -61,8 +61,9 @@ impl<'de> Deserialize<'de> for WindowConfigStates {
 }
 
 impl WindowConfig {
-  pub fn render(&self, app: &Application, context: Rc<Context>) {
+  pub fn render(&self, app: &Application, context: Rc<Context>, name: &str) {
     let window = gtk4::Window::builder()
+      .name(name)
       .application(app)
       .child(&self.child.render(context.clone()))
       .build();

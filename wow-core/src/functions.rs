@@ -46,7 +46,7 @@ pub fn to_window_entry(entry: DirEntry) -> Option<(String, (WindowConfig, Window
       .map_err(|_| format!("Failed to read states from: {}", file_name))?;
 
     let config = serde_yaml::from_str(&content)
-      .map_err(|_| format!("Failed to parse config file {}", file_name))?;
+      .map_err(|e| format!("Failed to parse config file {}, err: {:?}", file_name, e))?;
 
     println!("Adding window : {:?}", file_name);
     Ok((file_name, (config, states)))

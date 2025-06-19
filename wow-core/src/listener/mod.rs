@@ -1,6 +1,8 @@
 use crate::context::Context;
 use crate::listener::message::Message;
-use gtk4::prelude::{ApplicationExt, ApplicationExtManual};
+use gtk4::prelude::{
+  ActionExt, ApplicationExt, ApplicationExtManual, GtkApplicationExt, GtkWindowExt, WidgetExt,
+};
 use gtk4::{glib, Application};
 use std::fs::{metadata, remove_file};
 use std::io;
@@ -49,6 +51,13 @@ impl AppListener {
             }
             Message::OpenWindow(name) => {
               Context::open_window(context.clone(), &name, &app);
+            }
+            Message::CloseWindow(name) => {
+              for window in app.windows() {
+                if window.widget_name() == name {
+                  window.destroy();
+                }
+              }
             }
           }
         }

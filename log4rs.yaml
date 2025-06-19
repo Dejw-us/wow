@@ -9,6 +9,6 @@ appenders:
       pattern: "{d} - {l} - {m}{n}"
 
 root:
-  level: info
+  level: debug
   appenders:
     - stdout

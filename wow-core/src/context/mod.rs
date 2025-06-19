@@ -69,7 +69,7 @@ impl Context {
       let states = &w.1;
 
       states.add_states(context.as_ref());
-      window.render(app, context.clone());
+      window.render(app, context.clone(), name);
     })
   }
 
