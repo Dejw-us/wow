@@ -1,6 +1,7 @@
 use crate::attribute::align::Align;
 use crate::attribute::geometry::Geometry;
 use crate::attribute::orientation::Orientation;
+use crate::attribute::spacing::Spacing;
 use crate::attribute::style::Style;
 use crate::widget::{Widget, WidgetEssentials};
 use gtk4::prelude::Cast;
@@ -15,6 +16,7 @@ pub struct ContainerConfig {
   geometry: Option<Geometry>,
   style: Option<Style>,
   align: Option<Align>,
+  spacing: Option<Spacing>,
 }
 
 impl WidgetEssentials for ContainerConfig {

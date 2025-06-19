@@ -2,6 +2,7 @@ pub mod action;
 pub mod attribute;
 pub mod context;
 pub mod display;
+pub mod function;
 mod functions;
 pub mod listener;
 pub mod object;
