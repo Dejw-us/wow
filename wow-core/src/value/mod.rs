@@ -1,7 +1,8 @@
 use crate::object::Object;
+use serde::Deserialize;
 use std::fmt::Display;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Deserialize)]
 pub enum Value {
   None,
   Object(Object),

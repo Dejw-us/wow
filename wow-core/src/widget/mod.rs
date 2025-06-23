@@ -1,10 +1,12 @@
 pub mod button;
 pub mod container;
+pub mod custom;
 pub mod label;
 
 use crate::context::Context;
 use crate::widget::button::ButtonConfig;
 use crate::widget::container::ContainerConfig;
+use crate::widget::custom::CustomConfig;
 use crate::widget::label::LabelConfig;
 use gtk4::prelude::{BoxExt, Cast, GskRendererExt, ObjectType, WidgetExt};
 use serde::Deserialize;
@@ -18,7 +20,7 @@ pub enum Widget {
   Label(LabelConfig),
   Button(ButtonConfig),
   Container(ContainerConfig),
-  Custom { name: String },
+  Custom(CustomConfig),
 }
 
 impl ApplyWidget for Vec<Widget> {
@@ -41,7 +43,8 @@ impl RenderWidget for Widget {
       Widget::Label(label) => label.render(context.clone()),
       Widget::Button(button) => button.render(context.clone()),
       Widget::Container(container) => container.render(context.clone()),
-      Widget::Custom { name } => {
+      Widget::Custom(custom) => {
+        let name = custom.name();
         if let Some(widget) = context.get_custom_widget(name) {
           widget.render(context.clone())
         } else {

@@ -1,7 +1,8 @@
 use crate::value::Value;
+use serde::Deserialize;
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct Object {
   pub fields: HashMap<String, Value>,
 }

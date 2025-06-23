@@ -1,0 +1,13 @@
+Add window/widget open context (this will help injecting params into widgets and windows)
+Organize code better
+
+Process of opening window
+    - look into .config/wow/windows
+    - try to find window config file
+    - replace params in raw string
+    - deserialize window config
+    - open window
+
+disable opening two or more windows of the same type
+
+
