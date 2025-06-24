@@ -32,7 +32,8 @@ impl Context {
       .filter(Files::is_file)
       .filter_map(functions::to_window_entry)
       .collect();
-    let widgets = fs::read_dir(widgets_dir)?
+    let widgets = fs::read_dir(widgets_dir)
+      .map_err(Errors::unknown)?
       .filter_map(Result::ok)
       .filter(Files::is_file)
       .filter_map(functions::to_widget_entry)

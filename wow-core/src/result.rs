@@ -15,3 +15,9 @@ pub enum Error {
   #[error("Failed to create config directory: {0}")]
   FailedToCreateConfigDir(String),
 }
+
+impl From<&str> for Error {
+  fn from(value: &str) -> Self {
+    Self::Message(value.into())
+  }
+}

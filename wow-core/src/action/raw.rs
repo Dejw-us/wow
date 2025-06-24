@@ -76,7 +76,7 @@ impl RawAction {
     }
   }
 
-  pub fn parse(s: &str) -> Result<Self, String> {
+  pub fn parse(s: &str) -> crate::Result<Self> {
     let s = s.strip_prefix('~').ok_or("Actions need to start with ~")?;
     let open_paren = s.find('(').ok_or("Invalid syntax. Expected '('")?;
     let name = &s[..open_paren];
