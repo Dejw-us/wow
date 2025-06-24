@@ -1,18 +1,17 @@
-use std::fmt::{Display, Formatter};
+use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
+  #[error("Config directory not found")]
+  ConfigDirNotFound,
+  #[error("Failed to convert buffer to UTF-8 string")]
+  Utf8Error,
+  #[error("{0}")]
   Message(String),
-  Unknown,
-}
-
-impl Display for Error {
-  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-    match self {
-      Error::Message(msg) => write!(f, "{}", msg),
-      Error::Unknown => write!(f, "Unknown error"),
-    }
-  }
+  #[error("Error caused by: {0}")]
+  Unknown(Box<dyn std::error::Error + Send + Sync>),
+  #[error("Failed to create config directory: {0}")]
+  FailedToCreateConfigDir(String),
 }

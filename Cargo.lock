@@ -1676,6 +1676,7 @@ dependencies = [
  "log4rs",
  "serde",
  "serde_yaml",
+ "thiserror",
  "wow-derive",
  "wow-utils",
 ]

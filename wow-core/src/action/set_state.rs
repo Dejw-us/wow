@@ -32,7 +32,7 @@ impl RunAction for SetStateAction {
 
   fn run(&self, context: Rc<Context>, widget: WeakRef<gtk4::Widget>) -> Value {
     let value = self.action.run(context.clone(), widget);
-    context.set_state_value(&self.name, value.clone());
+    context.set_state(&self.name, value.clone());
     value
   }
 }

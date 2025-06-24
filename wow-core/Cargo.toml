@@ -17,3 +17,4 @@ log = { workspace = true }
 log4rs = { workspace = true }
 derive-new = "0.7.0"
 getset = "0.1.5"
+thiserror = "2.0.12"

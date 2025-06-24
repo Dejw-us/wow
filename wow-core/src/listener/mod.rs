@@ -47,7 +47,7 @@ impl AppListener {
           println!("Received message {:?}", msg);
           match msg {
             Message::SetState(name, value) => {
-              context.set_state_value(&name, value);
+              context.set_state(&name, value);
             }
             Message::OpenWindow(name) => {
               Context::open_window(context.clone(), &name, &app);

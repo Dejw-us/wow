@@ -11,3 +11,6 @@ pub mod state;
 pub mod value;
 pub mod widget;
 pub mod window;
+
+pub use result::Error;
+pub use result::Result;

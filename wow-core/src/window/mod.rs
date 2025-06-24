@@ -32,7 +32,7 @@ impl WindowConfigStates {
   pub fn add_states(&self, context: &Context) {
     self.states.iter().for_each(|(name, state)| {
       println!("Adding state {}", name);
-      context.set_state_value(name, state.clone());
+      context.set_state(name, state.clone());
     });
   }
 }
