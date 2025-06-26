@@ -41,7 +41,7 @@ pub fn impl_render_widget(token: DeriveInput) -> TokenStream {
       fn render(&self, context: std::rc::Rc<crate::context::Context>) -> gtk4::Widget {
         use gtk4::glib::clone::Downgrade;
         use crate::widget::ApplyWidget;
-        use crate::display::TextDisplay;
+        use crate::display::traits;
         use gtk4::prelude::Cast;
 
         let widget = Self::build();
